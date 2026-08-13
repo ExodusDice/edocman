@@ -174,6 +174,10 @@ public class OrderController {
                 return new BigDecimal("1200.00");
             case YOUTUBE_PREMIUM_BUSINESS:
                 return new BigDecimal("390.00");
+            case FINANCIAL_STATEMENT_AUDIT:
+                return new BigDecimal("7500.00");
+            case FINANCIAL_STATEMENT_APPROVAL:
+                return new BigDecimal("1500.00");
             default:
                 return new BigDecimal("1000.00");
         }

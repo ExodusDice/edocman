@@ -80,7 +80,9 @@ public class LegalServiceOrder {
         FINANCIAL_STATEMENT_PREP,
         COMPANY_DIRECTOR_CHANGE,
         SHAREHOLDER_UPDATE,
-        YOUTUBE_PREMIUM_BUSINESS
+        YOUTUBE_PREMIUM_BUSINESS,
+        FINANCIAL_STATEMENT_AUDIT,
+        FINANCIAL_STATEMENT_APPROVAL
     }
 
     public enum OrderStatus {

@@ -111,6 +111,12 @@ public class DocumentGeneratorService {
             case YOUTUBE_PREMIUM_BUSINESS:
                 generateYoutubePremiumBusinessHtml(html, order, data, customerName);
                 break;
+            case FINANCIAL_STATEMENT_AUDIT:
+                generateFinancialStatementAuditHtml(html, order, data, customerName);
+                break;
+            case FINANCIAL_STATEMENT_APPROVAL:
+                generateFinancialStatementApprovalHtml(html, order, data, customerName);
+                break;
         }
 
         // Shared Footer Signatures
@@ -543,6 +549,66 @@ public class DocumentGeneratorService {
                 "    </tr>\n" +
                 "  </tbody>\n" +
                 "</table>");
+        html.append("  </div>\n");
+    }
+
+    private void generateFinancialStatementAuditHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">รายงานความเห็นและหนังสือรับรองของผู้สอบบัญชีรับอนุญาต (CPA Audit Opinion Report)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลบริษัทและรอบบัญชีผู้ตรวจสอบ / Audit Engagement</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อกิจการ / Company Name:</span> <span class=\"value\">" + data.getOrDefault("companyName", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขทะเบียนนิติบุคคล / Registration ID:</span> <span class=\"value\">" + data.getOrDefault("companyId", "xxxxxxxxxxxxx") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">รอบปีงวดบัญชี / Accounting Period:</span> <span class=\"value\">" + data.getOrDefault("accountingPeriod", "2568") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลฐานะทางการเงินและผลการดำเนินงาน / Audited Financial Overview</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">สินทรัพย์รวม (บาท) / Total Assets:</span> <span class=\"value\">" + data.getOrDefault("totalAssets", "0.00") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">หนี้สินรวม (บาท) / Total Liabilities:</span> <span class=\"value\">" + data.getOrDefault("totalLiabilities", "0.00") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">รายได้รวม (บาท) / Total Revenue:</span> <span class=\"value\">" + data.getOrDefault("totalRevenue", "0.00") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">กำไร(ขาดทุน)สุทธิ / Net Profit (Loss):</span> <span class=\"value\">" + data.getOrDefault("netProfit", "0.00") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ความเห็นของผู้สอบบัญชีรับอนุญาต / Auditor's Opinion</div>\n");
+        html.append("    <p>ข้าพเจ้าได้ตรวจสอบงบการเงินข้างต้นของบริษัทแล้ว เห็นว่างบการเงินแสดงฐานะการเงินและผลการดำเนินงานโดยถูกต้องตามที่ควรในสาระสำคัญตามมาตรฐานการรายงานทางการเงิน</p>\n");
+        html.append("    <p><strong>ผู้สอบบัญชีรับอนุญาต (CPA):</strong> <span class=\"value\">" + data.getOrDefault("cpaName", "นายสมศักดิ์ ตรวจสอบดี (CPA เลขที่ 9988)") + "</span></p>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateFinancialStatementApprovalHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">รายงานการประชุมผู้ถือหุ้นอนุมัติงบการเงินประจำปี (Annual Shareholder Resolution)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลการจัดประชุมอนุมัติ / Annual General Meeting Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อบริษัท / Company Name:</span> <span class=\"value\">" + data.getOrDefault("companyName", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขทะเบียนนิติบุคคล / Registration ID:</span> <span class=\"value\">" + data.getOrDefault("companyId", "xxxxxxxxxxxxx") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">วันที่จัดประชุมสามัญ / Meeting Date:</span> <span class=\"value\">" + data.getOrDefault("meetingDate", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เวลาเริ่มประชุม / Start Time:</span> <span class=\"value\">" + data.getOrDefault("meetingTime", "09:00 น.") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">สถานที่จัดประชุม / Meeting Venue:</span> <span class=\"value\">" + data.getOrDefault("meetingVenue", "สำนักงานใหญ่ของบริษัท") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ระเบียบวาระและมติพิเศษ / Meeting Resolutions</div>\n");
+        html.append("    <p><strong>วาระที่ 1:</strong> พิจารณารับรองรายงานการประชุมครั้งที่ผ่านมา</p>\n");
+        html.append("    <p><strong>วาระที่ 2:</strong> พิจารณาและอนุมัติงบแสดงฐานะการเงินและงบกำไรขาดทุน ประจำปีสิ้นสุดรอบปีบัญชี</p>\n");
+        html.append("    <p><strong>มติที่ประชุม:</strong> ที่ประชุมมีมติเอกฉันท์อนุมัติรับรองงบการเงินประจำปีและเสนอแต่งตั้งผู้สอบบัญชี</p>\n");
+        html.append("    <p><strong>ประธานในที่ประชุม / Chairman:</strong> <span class=\"value\">" + data.getOrDefault("chairpersonName", "-") + "</span></p>\n");
         html.append("  </div>\n");
     }
 }

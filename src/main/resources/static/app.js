@@ -361,6 +361,10 @@ function selectServiceCatalog(catalogType) {
             showWizard('shareholder-update');
         } else if (catalogType === 'YOUTUBE') {
             showWizard('youtube-premium');
+        } else if (catalogType === 'FINANCIAL_AUDIT') {
+            showWizard('financial-audit');
+        } else if (catalogType === 'FINANCIAL_APPROVAL') {
+            showWizard('financial-approval');
         }
     }
 }
@@ -962,6 +966,88 @@ function showWizard(serviceType) {
                 </ul>
             </div>
         `;
+    } else if (serviceType === 'financial-audit') {
+        titleEl.innerHTML = '<i class="fa-solid fa-user-check text-primary"></i> บริการตรวจสอบงบการเงินโดยผู้สอบบัญชีรับอนุญาต (CPA)';
+        fieldsHtml = `
+            <div class="form-group">
+                <label>ชื่อบริษัทผู้ขอการตรวจสอบงบ / Company Name</label>
+                <input type="text" class="form-control" name="companyName" required placeholder="บริษัท เทคฟรอนเทียร์ จำกัด">
+            </div>
+            <div class="form-group">
+                <label>เลขทะเบียนนิติบุคคล 13 หลัก / Registration Company ID</label>
+                <input type="text" class="form-control" name="companyId" required placeholder="01055xxxxxxxx" maxlength="13">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>รอบระยะเวลาบัญชีที่ตรวจสอบ (พ.ศ.) / Accounting Period</label>
+                    <input type="text" class="form-control" name="accountingPeriod" required placeholder="31 ธันวาคม 2568" value="2568">
+                </div>
+                <div class="form-group">
+                    <label>ผู้ทำบัญชีผู้รวบรวมตัวเลข / Bookkeeper Name</label>
+                    <input type="text" class="form-control" name="bookkeeperName" required placeholder="นางสาว สมใจ รักบัญชี">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>จำนวนสินทรัพย์รวมตามงบการเงิน (บาท) / Total Assets</label>
+                    <input type="text" class="form-control" name="totalAssets" required placeholder="10,000,000.00">
+                </div>
+                <div class="form-group">
+                    <label>หนี้สินรวมตามงบการเงิน (บาท) / Total Liabilities</label>
+                    <input type="text" class="form-control" name="totalLiabilities" required placeholder="3,000,000.00">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>รายได้รวมปีนี้ตามงบ (บาท) / Total Revenue</label>
+                    <input type="text" class="form-control" name="totalRevenue" required placeholder="8,000,000.00">
+                </div>
+                <div class="form-group">
+                    <label>กำไร(ขาดทุน)สุทธิปีนี้ (บาท) / Net Profit (Loss)</label>
+                    <input type="text" class="form-control" name="netProfit" required placeholder="2,000,000.00">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>แนบงบดุล/งบกำไรขาดทุนฉบับร่างที่สมบูรณ์ (PDF)</label>
+                <p style="font-size: 11px; color: #d97706;">* กรุณาแนบรายงานสรุปบัญชีในขั้นตอนอัปโหลดเอกสารประกอบคำขอรับบริการด้านล่าง</p>
+            </div>
+        `;
+    } else if (serviceType === 'financial-approval') {
+        titleEl.innerHTML = '<i class="fa-solid fa-comments text-primary"></i> บริการจัดทำรายงานประชุมอนุมัติงบการเงินและยื่นส่งมติ';
+        fieldsHtml = `
+            <div class="form-group">
+                <label>ชื่อบริษัทที่จัดประชุมผู้ถือหุ้น / Company Name</label>
+                <input type="text" class="form-control" name="companyName" required placeholder="บริษัท เทคฟรอนเทียร์ จำกัด">
+            </div>
+            <div class="form-group">
+                <label>เลขทะเบียนนิติบุคคล 13 หลัก / Registration Company ID</label>
+                <input type="text" class="form-control" name="companyId" required placeholder="01055xxxxxxxx" maxlength="13">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>วันที่จัดประชุมสามัญประจำปี (AGM) / Meeting Date</label>
+                    <input type="date" class="form-control" name="meetingDate" required>
+                </div>
+                <div class="form-group">
+                    <label>เวลาเริ่มประชุม / Meeting Time</label>
+                    <input type="text" class="form-control" name="meetingTime" required placeholder="09:00 น." value="09:00 น.">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>สถานที่ประชุมอนุมัติงบ / Meeting Venue</label>
+                <input type="text" class="form-control" name="meetingVenue" required placeholder="ห้องประชุมใหญ่ ณ สำนักงานเลขที่ ...">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>ชื่อผู้เป็นประธานในที่ประชุม / Chairperson Name</label>
+                    <input type="text" class="form-control" name="chairpersonName" required placeholder="นายสมศักดิ์ รักดี">
+                </div>
+                <div class="form-group">
+                    <label>จำนวนผู้ถือหุ้น/ผู้รับมอบอำนาจที่มาร่วมประชุม</label>
+                    <input type="number" class="form-control" name="shareholderCount" required placeholder="3" min="1">
+                </div>
+            </div>
+        `;
     }
 
     fieldsContainer.innerHTML = fieldsHtml;
@@ -1385,6 +1471,8 @@ function mapWizardToServiceEnum(wizardId) {
         case 'company-director-change': return 'COMPANY_DIRECTOR_CHANGE';
         case 'shareholder-update': return 'SHAREHOLDER_UPDATE';
         case 'youtube-premium': return 'YOUTUBE_PREMIUM_BUSINESS';
+        case 'financial-audit': return 'FINANCIAL_STATEMENT_AUDIT';
+        case 'financial-approval': return 'FINANCIAL_STATEMENT_APPROVAL';
         default: return 'COMPANY_NAME_RESERVATION';
     }
 }
@@ -1404,6 +1492,8 @@ function translateServiceType(enumVal) {
         case 'COMPANY_DIRECTOR_CHANGE': return 'เปลี่ยนกรรมการผู้มีอำนาจ (เปลี่ยนเจ้าของ)';
         case 'SHAREHOLDER_UPDATE': return 'แก้ไขรายชื่อผู้ถือหุ้น (บอจ.5)';
         case 'YOUTUBE_PREMIUM_BUSINESS': return 'จัดการภาษีค่าสมาชิก YouTube Premium องค์กร';
+        case 'FINANCIAL_STATEMENT_AUDIT': return 'บริการตรวจสอบงบการเงินโดยผู้สอบบัญชี (CPA)';
+        case 'FINANCIAL_STATEMENT_APPROVAL': return 'บริการจัดประชุมผู้ถือหุ้นอนุมัติงบการเงิน';
         default: return enumVal;
     }
 }
