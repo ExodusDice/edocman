@@ -172,6 +172,8 @@ public class OrderController {
                 return new BigDecimal("1900.00");
             case SHAREHOLDER_UPDATE:
                 return new BigDecimal("1200.00");
+            case YOUTUBE_PREMIUM_BUSINESS:
+                return new BigDecimal("390.00");
             default:
                 return new BigDecimal("1000.00");
         }

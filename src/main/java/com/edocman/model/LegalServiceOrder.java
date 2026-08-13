@@ -79,7 +79,8 @@ public class LegalServiceOrder {
         MEMORANDUM_AMENDMENT,
         FINANCIAL_STATEMENT_PREP,
         COMPANY_DIRECTOR_CHANGE,
-        SHAREHOLDER_UPDATE
+        SHAREHOLDER_UPDATE,
+        YOUTUBE_PREMIUM_BUSINESS
     }
 
     public enum OrderStatus {
