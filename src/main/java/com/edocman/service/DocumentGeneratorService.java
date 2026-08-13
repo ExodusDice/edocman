@@ -108,9 +108,6 @@ public class DocumentGeneratorService {
             case SHAREHOLDER_UPDATE:
                 generateShareholderUpdateHtml(html, order, data, customerName);
                 break;
-            case YOUTUBE_PREMIUM_BUSINESS:
-                generateYoutubePremiumBusinessHtml(html, order, data, customerName);
-                break;
             case FINANCIAL_STATEMENT_AUDIT:
                 generateFinancialStatementAuditHtml(html, order, data, customerName);
                 break;
@@ -499,60 +496,7 @@ public class DocumentGeneratorService {
         html.append("  </div>\n");
     }
 
-    private void generateYoutubePremiumBusinessHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
-        html.append("  <div class=\"doc-title\">ใบนำส่งค่าบริการและใบกำกับภาษี YouTube Premium (Corporate Expense File)</div>\n");
-        
-        html.append("  <div class=\"section\">\n");
-        html.append("    <div class=\"section-title\">ข้อมูลกิจการผู้หักภาษี ณ ที่จ่าย / Corporate Details</div>\n");
-        html.append("    <div class=\"row\">\n");
-        html.append("      <div class=\"col\"><span class=\"label\">ชื่อบริษัท / Company Name:</span> <span class=\"value\">" + data.getOrDefault("companyName", "-") + "</span></div>\n");
-        html.append("      <div class=\"col\"><span class=\"label\">เลขทะเบียนผู้เสียภาษี / Tax ID:</span> <span class=\"value\">" + data.getOrDefault("taxId", "xxxxxxxxxxxxx") + "</span></div>\n");
-        html.append("    </div>\n");
-        html.append("    <div class=\"row\">\n");
-        html.append("      <div class=\"col\"><span class=\"label\">ที่อยู่ติดต่อ / Billing Address:</span> <span class=\"value\">" + data.getOrDefault("billingAddress", "-") + "</span></div>\n");
-        html.append("    </div>\n");
-        html.append("  </div>\n");
-
-        html.append("  <div class=\"section\">\n");
-        html.append("    <div class=\"section-title\">รายละเอียดค่าสมาชิก YouTube Premium / Subscription Details</div>\n");
-        html.append("    <div class=\"row\">\n");
-        html.append("      <div class=\"col\"><span class=\"label\">บัญชีผู้ใช้งาน / YouTube Account Email:</span> <span class=\"value\">" + data.getOrDefault("youtubeEmail", "-") + "</span></div>\n");
-        html.append("      <div class=\"col\"><span class=\"label\">แพ็กเกจที่สมัคร / YouTube Premium Plan:</span> <span class=\"value\">" + data.getOrDefault("subscriptionPlan", "Family Plan") + "</span></div>\n");
-        html.append("    </div>\n");
-        html.append("  </div>\n");
-
-        html.append("  <div class=\"section\">\n");
-        html.append("    <div class=\"section-title\">รายการคำนวณภาษีหัก ณ ที่จ่าย (3% Withholding Tax) / Financial Summary</div>\n");
-        html.append("<table style=\"width:100%; border-collapse:collapse; margin-top:10px; font-size:12px;\">\n" +
-                "  <thead>\n" +
-                "    <tr style=\"background:#f1f5f9;\">\n" +
-                "      <th style=\"border:1px solid #ccc; padding:8px; text-align:left;\">รายการ / Description</th>\n" +
-                "      <th style=\"border:1px solid #ccc; padding:8px; text-align:right;\">จำนวนเงิน (บาท) / Amount (THB)</th>\n" +
-                "    </tr>\n" +
-                "  </thead>\n" +
-                "  <tbody>\n" +
-                "    <tr>\n" +
-                "      <td style=\"border:1px solid #ccc; padding:8px;\">ค่าสมาชิก YouTube Premium (ก่อนภาษีมูลค่าเพิ่ม) / Subscription Base</td>\n" +
-                "      <td style=\"border:1px solid #ccc; padding:8px; text-align:right;\">" + data.getOrDefault("basePrice", "299.00") + " บาท</td>\n" +
-                "    </tr>\n" +
-                "    <tr>\n" +
-                "      <td style=\"border:1px solid #ccc; padding:8px;\">ภาษีมูลค่าเพิ่ม / VAT (7%)</td>\n" +
-                "      <td style=\"border:1px solid #ccc; padding:8px; text-align:right;\">" + data.getOrDefault("vatAmount", "20.93") + " บาท</td>\n" +
-                "    </tr>\n" +
-                "    <tr>\n" +
-                "      <td style=\"border:1px solid #ccc; padding:8px; font-weight:bold;\">ยอดชำระสุทธิ / Total Paid Amount</td>\n" +
-                "      <td style=\"border:1px solid #ccc; padding:8px; text-align:right; font-weight:bold;\">" + data.getOrDefault("totalPaid", "319.93") + " บาท</td>\n" +
-                "    </tr>\n" +
-                "    <tr style=\"background:#f8fafc;\">\n" +
-                "      <td style=\"border:1px solid #ccc; padding:8px; color:#c2410c;\">หักภาษี ณ ที่จ่ายสะสม / 3% Withholding Tax Deduction</td>\n" +
-                "      <td style=\"border:1px solid #ccc; padding:8px; text-align:right; color:#c2410c;\">-" + data.getOrDefault("whtAmount", "8.97") + " บาท</td>\n" +
-                "    </tr>\n" +
-                "  </tbody>\n" +
-                "</table>");
-        html.append("  </div>\n");
-    }
-
-    private void generateFinancialStatementAuditHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+private void generateFinancialStatementAuditHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
         html.append("  <div class=\"doc-title\">รายงานความเห็นและหนังสือรับรองของผู้สอบบัญชีรับอนุญาต (CPA Audit Opinion Report)</div>\n");
         
         html.append("  <div class=\"section\">\n");

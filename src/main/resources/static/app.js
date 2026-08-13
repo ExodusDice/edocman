@@ -359,8 +359,6 @@ function selectServiceCatalog(catalogType) {
             showWizard('company-director-change');
         } else if (catalogType === 'SHAREHOLDER_UPDATE') {
             showWizard('shareholder-update');
-        } else if (catalogType === 'YOUTUBE') {
-            showWizard('youtube-premium');
         } else if (catalogType === 'FINANCIAL_AUDIT') {
             showWizard('financial-audit');
         } else if (catalogType === 'FINANCIAL_APPROVAL') {
@@ -913,59 +911,6 @@ function showWizard(serviceType) {
                 </div>
             </div>
         `;
-    } else if (serviceType === 'youtube-premium') {
-        titleEl.innerHTML = '<i class="fa-brands fa-youtube text-danger"></i> บริการจัดการภาษีและใบกำกับภาษี YouTube Premium สำหรับบริษัท';
-        fieldsHtml = `
-            <div class="form-group">
-                <label>ชื่อบริษัทผู้ขอจดทะเบียนค่าใช้จ่าย / Company Name</label>
-                <input type="text" class="form-control" name="companyName" required placeholder="บริษัท เทคสตาร์ทอัพ จำกัด">
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>เลขผู้เสียภาษี 13 หลัก / Corporate Tax ID</label>
-                    <input type="text" class="form-control" name="taxId" required placeholder="01055xxxxxxxx" maxlength="13">
-                </div>
-                <div class="form-group">
-                    <label>อีเมลบัญชีผู้ใช้ YouTube / YouTube Premium Account Email</label>
-                    <input type="email" class="form-control" name="youtubeEmail" required placeholder="marketing@mycompany.com">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>ที่อยู่จดทะเบียนผู้เสียภาษี (สำหรับออกใบกำกับภาษี) / Billing Address</label>
-                <input type="text" class="form-control" name="billingAddress" required placeholder="123/45 ถนนรัชดาภิเษก แขวงดินแดง เขตดินแดง กรุงเทพฯ 10400">
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>แพ็กเกจสมาชิก YouTube Premium / Subscription Plan</label>
-                    <select class="form-control" name="subscriptionPlan" onchange="window.updateYoutubePriceDetails(this.value)">
-                        <option value="Individual Plan (รายบุคคล) - ฿179/ด">Individual Plan (รายบุคคล) - ฿179/เดือน</option>
-                        <option value="Family Plan (ครอบครัว/ทีมงาน) - ฿299/ด" selected>Family Plan (ครอบครัว/ทีมงาน) - ฿299/เดือน</option>
-                        <option value="Student Plan (นักศึกษา) - ฿95/ด">Student Plan (นักศึกษา) - ฿95/เดือน</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>รูปแบบบริการชำระเงินที่ต้องการ / Billing Integration</label>
-                    <select class="form-control" name="billingIntegration">
-                        <option value="ตัดบัตรบริษัท และ eDocman ออกใบหัก ณ ที่จ่าย">ตัดบัตรบริษัท และ eDocman ออกใบหัก ณ ที่จ่าย</option>
-                        <option value="eDocman สำรองจ่ายรายปี และสรุปภาษีหัก ณ ที่จ่าย">eDocman สำรองจ่ายรายปี และสรุปภาษีหัก ณ ที่จ่าย</option>
-                    </select>
-                </div>
-            </div>
-            <!-- Hidden inputs for precalculated YouTube subscription rates -->
-            <input type="hidden" name="basePrice" id="yt-base-price" value="299.00">
-            <input type="hidden" name="vatAmount" id="yt-vat-amount" value="20.93">
-            <input type="hidden" name="totalPaid" id="yt-total-paid" value="319.93">
-            <input type="hidden" name="whtAmount" id="yt-wht-amount" value="8.97">
-
-            <div class="form-group" style="background: rgba(220, 38, 38, 0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(220, 38, 38, 0.2); font-size: 12px; margin-top: 15px;">
-                <span style="color: #b91c1c; font-weight: bold;"><i class="fa-solid fa-calculator"></i> รายละเอียดการหักภาษี ณ ที่จ่ายประมาณการ (3%):</span>
-                <ul style="margin: 5px 0 0 15px; padding: 0;">
-                    <li>ราคาค่าบริการ YouTube Premium: <span id="lbl-yt-base">299.00</span> บาท (ไม่รวม VAT)</li>
-                    <li>ภาษีมูลค่าเพิ่ม (VAT 7%): <span id="lbl-yt-vat">20.93</span> บาท</li>
-                    <li>หักภาษี ณ ที่จ่ายสะสม (WHT 3%): <span id="lbl-yt-wht" style="color: #b91c1c; font-weight: bold;">8.97</span> บาท</li>
-                </ul>
-            </div>
-        `;
     } else if (serviceType === 'financial-audit') {
         titleEl.innerHTML = '<i class="fa-solid fa-user-check text-primary"></i> บริการตรวจสอบงบการเงินโดยผู้สอบบัญชีรับอนุญาต (CPA)';
         fieldsHtml = `
@@ -1470,7 +1415,6 @@ function mapWizardToServiceEnum(wizardId) {
         case 'financial-statement-prep': return 'FINANCIAL_STATEMENT_PREP';
         case 'company-director-change': return 'COMPANY_DIRECTOR_CHANGE';
         case 'shareholder-update': return 'SHAREHOLDER_UPDATE';
-        case 'youtube-premium': return 'YOUTUBE_PREMIUM_BUSINESS';
         case 'financial-audit': return 'FINANCIAL_STATEMENT_AUDIT';
         case 'financial-approval': return 'FINANCIAL_STATEMENT_APPROVAL';
         default: return 'COMPANY_NAME_RESERVATION';
@@ -1491,7 +1435,6 @@ function translateServiceType(enumVal) {
         case 'FINANCIAL_STATEMENT_PREP': return 'จัดทำงบการเงินและตรวจสอบบัญชี';
         case 'COMPANY_DIRECTOR_CHANGE': return 'เปลี่ยนกรรมการผู้มีอำนาจ (เปลี่ยนเจ้าของ)';
         case 'SHAREHOLDER_UPDATE': return 'แก้ไขรายชื่อผู้ถือหุ้น (บอจ.5)';
-        case 'YOUTUBE_PREMIUM_BUSINESS': return 'จัดการภาษีค่าสมาชิก YouTube Premium องค์กร';
         case 'FINANCIAL_STATEMENT_AUDIT': return 'บริการตรวจสอบงบการเงินโดยผู้สอบบัญชี (CPA)';
         case 'FINANCIAL_STATEMENT_APPROVAL': return 'บริการจัดประชุมผู้ถือหุ้นอนุมัติงบการเงิน';
         default: return enumVal;
@@ -1584,21 +1527,4 @@ function toggleSimSetting(key, enabled) {
     .catch(err => alert("ล้มเหลวในการบันทึกค่าการจำลองการทำงาน"));
 }
 
-window.updateYoutubePriceDetails = function(val) {
-    let base = 299.00;
-    if (val.includes("179")) base = 179.00;
-    else if (val.includes("95")) base = 95.00;
-    
-    let vat = (base * 0.07).toFixed(2);
-    let total = (parseFloat(base) + parseFloat(vat)).toFixed(2);
-    let wht = (base * 0.03).toFixed(2);
 
-    document.getElementById('yt-base-price').value = base.toFixed(2);
-    document.getElementById('yt-vat-amount').value = vat;
-    document.getElementById('yt-total-paid').value = total;
-    document.getElementById('yt-wht-amount').value = wht;
-
-    document.getElementById('lbl-yt-base').innerText = base.toFixed(2);
-    document.getElementById('lbl-yt-vat').innerText = vat;
-    document.getElementById('lbl-yt-wht').innerText = wht;
-}
