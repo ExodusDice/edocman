@@ -347,6 +347,8 @@ function selectServiceCatalog(catalogType) {
             showWizard('car-prb');
         } else if (catalogType === 'HOUSE') {
             showWizard('house-reg');
+        } else if (catalogType === 'PDPA') {
+            showWizard('pdpa-badge');
         }
     }
 }
@@ -667,6 +669,47 @@ function showWizard(serviceType) {
             <div class="form-group">
                 <label>รายชื่อบุคคลที่ขอจัดการข้อมูลสะกด / Resident Information</label>
                 <textarea class="form-control" name="residentsList" required rows="2" placeholder="นายประหยัด ชาติดี (ID Card: 310xxxxxxxxxx) ย้ายเข้ามาพักอาศัย"></textarea>
+            </div>
+        `;
+    } else if (serviceType === 'pdpa-badge') {
+        titleEl.innerHTML = '<i class="fa-solid fa-cookie-bite text-primary"></i> บริการติดตั้งตราสัญลักษณ์คุ้มครองข้อมูล (PDPA Compliant Badge)';
+        fieldsHtml = `
+            <div class="form-group">
+                <label>ชื่อนิติบุคคล หรือ ชื่อหน่วยงานผู้ยื่นขอ / Business Name</label>
+                <input type="text" class="form-control" name="businessName" required placeholder="บริษัท ตัวอย่าง จำกัด" value="${currentUser ? currentUser.fullName : ''}">
+            </div>
+            <div class="form-group">
+                <label>โดเมนเว็บไซต์ที่ต้องการติดตั้งตราสัญลักษณ์ / Website URL</label>
+                <input type="url" class="form-control" name="websiteUrl" required placeholder="https://mywebsite.com">
+            </div>
+            <div class="form-group">
+                <label>ลิงก์นโยบายความเป็นส่วนตัวของเว็บไซต์ / Privacy Policy URL</label>
+                <input type="url" class="form-control" name="privacyPolicyUrl" required placeholder="https://mywebsite.com/privacy">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>ตำแหน่งการแสดงผล / Badge Position</label>
+                    <select class="form-control" name="badgePosition">
+                        <option value="right">มุมขวาล่าง (Bottom Right)</option>
+                        <option value="left">มุมซ้ายล่าง (Bottom Left)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>สีตราสัญลักษณ์ / Badge Theme Color</label>
+                    <select class="form-control" name="badgeColor">
+                        <option value="#10b981">สีเขียวหยก (Jade Green)</option>
+                        <option value="#3b82f6">สีฟ้าโคบอลต์ (Cobalt Blue)</option>
+                        <option value="#d97706">สีส้มแอมเบอร์ (Amber Orange)</option>
+                        <option value="#0f172a">สีดำสเลท (Slate Black)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>รูปแบบตราสัญลักษณ์ที่เลือก / Badge Style</label>
+                <select class="form-control" name="badgeStyle">
+                    <option value="Floating Badge (ตราสัญลักษณ์ลอยตัว)">Floating Badge (ตราสัญลักษณ์ลอยตัว)</option>
+                    <option value="Footer Banner (แบนเนอร์ท้ายเว็บไซต์)">Footer Banner (แบนเนอร์ท้ายเว็บไซต์)</option>
+                </select>
             </div>
         `;
     }
@@ -1085,6 +1128,7 @@ function mapWizardToServiceEnum(wizardId) {
         case 'efiling': return 'DBD_E_FILING';
         case 'car-prb': return 'CAR_PRB_INSURANCE';
         case 'house-reg': return 'HOUSE_REGISTRATION_UPDATE';
+        case 'pdpa-badge': return 'PDPA_BADGE_SETUP';
         default: return 'COMPANY_NAME_RESERVATION';
     }
 }
@@ -1097,6 +1141,7 @@ function translateServiceType(enumVal) {
         case 'DBD_E_FILING': return 'นำส่งงบการเงินออนไลน์ (e-Filing)';
         case 'CAR_PRB_INSURANCE': return 'ประกันภัยรถยนต์ พ.ร.บ. ภาคบังคับ';
         case 'HOUSE_REGISTRATION_UPDATE': return 'แก้ไขปรับปรุงข้อมูลทะเบียนบ้าน';
+        case 'PDPA_BADGE_SETUP': return 'จัดทำตราสัญลักษณ์ PDPA Compliant';
         default: return enumVal;
     }
 }

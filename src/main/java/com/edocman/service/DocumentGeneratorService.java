@@ -90,6 +90,9 @@ public class DocumentGeneratorService {
             case HOUSE_REGISTRATION_UPDATE:
                 generateHouseRegistrationHtml(html, order, data, customerName);
                 break;
+            case PDPA_BADGE_SETUP:
+                generatePdpaBadgeHtml(html, order, data, customerName);
+                break;
         }
 
         // Shared Footer Signatures
@@ -278,6 +281,38 @@ public class DocumentGeneratorService {
         html.append("    <div class=\"row\">\n");
         html.append("      <div class=\"col\"><span class=\"label\">เอกสารแนบอ้างอิง / Supporting Uploads:</span> <span class=\"value\">" + (data.getOrDefault("attachmentUrl", null) != null ? "สำเนาบัตรประชาชน / สำเนาโฉนด" : "ไม่มีเอกสารแนบ") + "</span></div>\n");
         html.append("    </div>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generatePdpaBadgeHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">ใบรับรองตราสัญลักษณ์ PDPA และสคริปต์ติดตั้ง (eDocman PDPA Compliant)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลผู้ขอติดตั้งและเว็บไซต์ / Client & Website Info</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อหน่วยงาน / Business Name:</span> <span class=\"value\">" + data.getOrDefault("businessName", customerName) + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">โดเมนเว็บไซต์ / Website URL:</span> <span class=\"value\">" + data.getOrDefault("websiteUrl", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">นโยบายความเป็นส่วนตัว / Privacy Policy URL:</span> <span class=\"value\">" + data.getOrDefault("privacyPolicyUrl", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ตำแหน่งตราสัญลักษณ์ / Badge Style:</span> <span class=\"value\">" + data.getOrDefault("badgeStyle", "Floating (Bottom Right)") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        String badgeCode = "&lt;!-- eDocman PDPA Compliant Badge --&gt;\n" +
+                "&lt;script src=\"https://www.franktest.xyz/static/edocman.js?id=PDPA-" + order.getId() + "\"&gt;&lt;/script&gt;\n" +
+                "&lt;div id=\"edocman-pdpa-badge\" data-color=\"" + data.getOrDefault("badgeColor", "#10b981") + "\" data-position=\"" + data.getOrDefault("badgePosition", "right") + "\"&gt;&lt;/div&gt;";
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">โค้ดสคริปต์สำหรับการติดตั้ง / Installation Embed Code</div>\n");
+        html.append("    <p>คัดลอกโค้ดด้านล่างนี้ไปวางไว้ที่ส่วนท้ายของแท็ก <code>&lt;body&gt;</code> ในเว็บไซต์ของคุณ:</p>\n");
+        html.append("    <pre style=\"background:#f1f5f9; padding:15px; border-radius:6px; border:1px solid #cbd5e1; font-family:monospace; font-size:12px; overflow-x:auto;\">" + badgeCode + "</pre>\n");
+        html.append("  </div>\n");
+        
+        html.append("  <div class=\"section\" style=\"margin-top:30px; text-align:center; padding:20px; border:2px dashed #10b981; background:rgba(16, 185, 129, 0.03); border-radius:10px;\">\n");
+        html.append("    <h3 style=\"color:#047857; margin-top:0;\"><i class=\"fa-solid fa-circle-check\"></i> ใบรับรองการติดตั้งระบบ PDPA สำเร็จ</h3>\n");
+        html.append("    <p style=\"font-size:14px; margin:5px 0;\">เว็บไซต์นี้ได้ดำเนินการลงทะเบียนติดตั้งตราสัญลักษณ์คุ้มครองข้อมูลส่วนบุคคล (PDPA Compliant Badge) เรียบร้อยแล้ว</p>\n");
+        html.append("    <p style=\"font-size:13px; font-weight:bold;\">eDocman Certification ID: ED-PDPA-" + String.format("%06d", order.getId()) + "</p>\n");
         html.append("  </div>\n");
     }
 }

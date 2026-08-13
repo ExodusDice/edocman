@@ -160,6 +160,8 @@ public class OrderController {
                 return new BigDecimal("645.00");
             case HOUSE_REGISTRATION_UPDATE:
                 return new BigDecimal("990.00");
+            case PDPA_BADGE_SETUP:
+                return new BigDecimal("890.00");
             default:
                 return new BigDecimal("1000.00");
         }
