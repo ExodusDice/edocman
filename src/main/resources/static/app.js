@@ -33,7 +33,17 @@ function showSection(sectionId) {
     } else if (sectionId === 'admin') {
         document.getElementById('admin-section').classList.remove('hidden');
         document.getElementById('nav-admin-link').classList.add('active');
-        fetchAdminOrders();
+        const role = localStorage.getItem('edocman_role');
+        if (role === 'ADMIN') {
+            document.getElementById('admin-login-panel').classList.add('hidden');
+            document.getElementById('admin-dashboard-panel').classList.remove('hidden');
+            fetchAdminOrders();
+            loadAdminUsers();
+            loadAdminConfig();
+        } else {
+            document.getElementById('admin-login-panel').classList.remove('hidden');
+            document.getElementById('admin-dashboard-panel').classList.add('hidden');
+        }
     }
     
     // Scroll to top
