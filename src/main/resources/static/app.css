@@ -1,17 +1,17 @@
 /* Base reset & Variables */
 :root {
-    --bg-dark: #0f172a;
-    --bg-card: #1e293b;
-    --bg-light: #f8fafc;
-    --text-light: #f1f5f9;
-    --text-muted: #94a3b8;
-    --text-dark: #1e293b;
-    --primary: #d97706; /* Golden Amber - Legal look */
+    --bg-dark: #f8fafc; /* Premium off-white */
+    --bg-card: #ffffff; /* Clean white for cards */
+    --bg-light: #f1f5f9; /* Zone contrast */
+    --text-light: #0f172a; /* Slate dark main text */
+    --text-muted: #64748b; /* Slate gray secondary text */
+    --text-dark: #0f172a;
+    --primary: #d97706; /* Golden Amber stays */
     --primary-hover: #b45309;
-    --secondary: #0ea5e9; /* Smart sky blue */
+    --secondary: #0ea5e9;
     --success: #10b981;
     --danger: #ef4444;
-    --border-color: #334155;
+    --border-color: #cbd5e1; /* Soft gray border */
     --border-light: #e2e8f0;
     --font-prompt: 'Prompt', sans-serif;
     --font-inter: 'Inter', sans-serif;
@@ -108,7 +108,7 @@ p { margin-bottom: 1rem; font-weight: 300; line-height: 1.7; }
 
 /* Navigation Bar */
 .navbar {
-    background-color: rgba(15, 23, 42, 0.9);
+    background-color: rgba(248, 250, 252, 0.9);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
@@ -128,7 +128,7 @@ p { margin-bottom: 1rem; font-weight: 300; line-height: 1.7; }
     gap: 10px;
     font-size: 22px;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-light);
     text-decoration: none;
     letter-spacing: 0.5px;
 }
@@ -147,7 +147,7 @@ p { margin-bottom: 1rem; font-weight: 300; line-height: 1.7; }
     transition: var(--transition);
 }
 .nav-links a:hover {
-    color: #fff;
+    color: var(--primary);
 }
 .auth-buttons {
     display: flex;
@@ -308,7 +308,7 @@ p { margin-bottom: 1rem; font-weight: 300; line-height: 1.7; }
 
 /* How It Works section */
 .how-it-works {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.02);
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
     padding: 80px 0;
@@ -372,8 +372,8 @@ p { margin-bottom: 1rem; font-weight: 300; line-height: 1.7; }
     transition: var(--transition);
 }
 .sidebar-menu a:hover {
-    color: #fff;
-    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--primary);
+    background-color: rgba(217, 119, 6, 0.05);
 }
 .sidebar-menu li.active a {
     color: #fff;
@@ -394,7 +394,7 @@ p { margin-bottom: 1rem; font-weight: 300; line-height: 1.7; }
 
 /* Order Rows in Dashboard */
 .order-row {
-    background-color: rgba(0, 0, 0, 0.15);
+    background-color: rgba(0, 0, 0, 0.02);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 20px;
@@ -406,7 +406,7 @@ p { margin-bottom: 1rem; font-weight: 300; line-height: 1.7; }
     transition: var(--transition);
 }
 .order-row:hover {
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: rgba(0, 0, 0, 0.04);
 }
 .order-id { font-family: monospace; font-weight: bold; color: var(--primary); }
 .order-details strong { display: block; font-size: 15px; }
@@ -439,11 +439,11 @@ p { margin-bottom: 1rem; font-weight: 300; line-height: 1.7; }
 }
 .form-control {
     width: 100%;
-    background-color: rgba(15, 23, 42, 0.6);
+    background-color: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 12px;
-    color: #fff;
+    color: var(--text-light);
     font-family: var(--font-prompt);
     font-size: 14px;
     transition: var(--transition);
