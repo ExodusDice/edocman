@@ -114,6 +114,9 @@ public class DocumentGeneratorService {
             case FINANCIAL_STATEMENT_APPROVAL:
                 generateFinancialStatementApprovalHtml(html, order, data, customerName);
                 break;
+            case SMART_ETAX:
+                generateSmartEtaxHtml(html, order, data, customerName);
+                break;
         }
 
         // Shared Footer Signatures
@@ -553,6 +556,33 @@ private void generateFinancialStatementAuditHtml(StringBuilder html, LegalServic
         html.append("    <p><strong>วาระที่ 2:</strong> พิจารณาและอนุมัติงบแสดงฐานะการเงินและงบกำไรขาดทุน ประจำปีสิ้นสุดรอบปีบัญชี</p>\n");
         html.append("    <p><strong>มติที่ประชุม:</strong> ที่ประชุมมีมติเอกฉันท์อนุมัติรับรองงบการเงินประจำปีและเสนอแต่งตั้งผู้สอบบัญชี</p>\n");
         html.append("    <p><strong>ประธานในที่ประชุม / Chairman:</strong> <span class=\"value\">" + data.getOrDefault("chairpersonName", "-") + "</span></p>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateSmartEtaxHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">ใบสมัครการติดตั้งระบบ Smart e-Tax Invoice & e-Receipt (Revenue Department Connect)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลกิจการผู้ขอติดตั้งระบบ / Corporate Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อบริษัท / Company Name:</span> <span class=\"value\">" + data.getOrDefault("companyName", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขผู้เสียภาษี 13 หลัก / Corporate Tax ID:</span> <span class=\"value\">" + data.getOrDefault("taxId", "xxxxxxxxxxxxx") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">อีเมลติดต่อ / Contact Email:</span> <span class=\"value\">" + data.getOrDefault("contactEmail", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ระบบ ERP/Billing ปัจจุบัน / ERP System:</span> <span class=\"value\">" + data.getOrDefault("erpSystem", "ระบบภายใน/เขียนเอง") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลโครงสร้างการส่งเอกสารภาษี / Integration Profile</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">จำนวนอินวอยซ์เฉลี่ยต่อเดือน / Est. Volume:</span> <span class=\"value\">" + data.getOrDefault("invoiceVolume", "น้อยกว่า 1,000 ใบ") + " ใบ</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ผู้มีอำนาจลงชื่อ / Authorized Signatory:</span> <span class=\"value\">" + data.getOrDefault("authorizedSignatory", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <p style=\"margin-top:15px; font-size:12px; line-height:1.6; color:#475569;\">" +
+                "ข้าพเจ้ายินยอมให้ผู้ให้บริการ eDocman และพาร์ทเนอร์นำส่งเอกสารการสมัครสิทธิ ออกแบบระบบลงนามเอกสารอิเล็กทรอนิกส์ (HSM/Cloud Signature) " +
+                "และติดต่อกรมสรรพากรเพื่อขอนำส่งข้อมูลทางอิเล็กทรอนิกส์ตามมาตรา 3 ตรี แห่งประมวลรัษฎากร</p>\n");
         html.append("  </div>\n");
     }
 }

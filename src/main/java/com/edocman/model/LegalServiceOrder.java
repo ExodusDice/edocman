@@ -81,7 +81,8 @@ public class LegalServiceOrder {
         COMPANY_DIRECTOR_CHANGE,
         SHAREHOLDER_UPDATE,
         FINANCIAL_STATEMENT_AUDIT,
-        FINANCIAL_STATEMENT_APPROVAL
+        FINANCIAL_STATEMENT_APPROVAL,
+        SMART_ETAX
     }
 
     public enum OrderStatus {

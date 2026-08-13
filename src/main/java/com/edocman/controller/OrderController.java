@@ -176,6 +176,8 @@ public class OrderController {
                 return new BigDecimal("7500.00");
             case FINANCIAL_STATEMENT_APPROVAL:
                 return new BigDecimal("1500.00");
+            case SMART_ETAX:
+                return new BigDecimal("2500.00");
             default:
                 return new BigDecimal("1000.00");
         }

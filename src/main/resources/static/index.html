@@ -117,63 +117,79 @@
                 <h2>บริการดิจิทัลภาครัฐและเอกสารกฎหมาย</h2>
                 <p>เลือกบริการที่คุณต้องการทำรายการในรูปแบบออนไลน์ ไร้กระดาษ</p>
             </div>
+
+            <!-- Filter Tags -->
+            <div class="filter-tags">
+                <button class="btn-tag active" data-filter="all">ทั้งหมด / All</button>
+                <button class="btn-tag" data-filter="dbd">DBD (กรมพัฒนาธุรกิจการค้า)</button>
+                <button class="btn-tag" data-filter="vehicle">Vehicle (ยานพาหนะ)</button>
+                <button class="btn-tag" data-filter="company">Company (นิติบุคคล & บัญชี)</button>
+            </div>
+
             <div class="grid-3">
                 <!-- DBD Services -->
-                <div class="card service-card">
+                <div class="card service-card" data-category="dbd">
                     <div class="service-icon"><i class="fa-solid fa-building-flag"></i></div>
                     <h3>บริการ DBD (กรมพัฒนาธุรกิจการค้า)</h3>
                     <p>จองชื่อนิติบุคคล, คำขอจดทะเบียนจัดตั้งบริษัทจำกัด, บริการจดทะเบียนเลิกบริษัท และยื่นงบการเงิน e-Filing สะดวก รวดเร็ว</p>
                     <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('DBD')">เปิดรายการ DBD</button>
                 </div>
                 <!-- Car Insurance -->
-                <div class="card service-card">
+                <div class="card service-card" data-category="vehicle">
                     <div class="service-icon"><i class="fa-solid fa-car-burst"></i></div>
                     <h3>ประกันภัยรถยนต์ พ.ร.บ. ภาคบังคับ</h3>
                     <p>ซื้อ พ.ร.บ. ออนไลน์ คุ้มครองทันที รับเอกสารและกรมธรรม์ดิจิทัลพร้อมพิมพ์ หรือใช้ยื่นภาษีรถยนต์ประจำปีได้เลย</p>
                     <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('CAR')">ทำรายการ พ.ร.บ.</button>
                 </div>
                 <!-- House Registration -->
-                <div class="card service-card">
+                <div class="card service-card" data-category="company">
                     <div class="service-icon"><i class="fa-solid fa-house-chimney-window"></i></div>
                     <h3>คำร้องทะเบียนบ้าน (ที่อยู่/ปรับปรุง)</h3>
                     <p>แก้ไขข้อมูลทะเบียนบ้าน ยื่นย้ายเข้า-ย้ายออก แจ้งข้อมูลคนในบ้านผ่านระบบออนไลน์ พร้อมแนบโฉนดและบัตรในรูปแบบดิจิทัล</p>
                     <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('HOUSE')">แจ้งแก้ไขทะเบียนบ้าน</button>
                 </div>
                 <!-- PDPA Badge Service -->
-                <div class="card service-card">
+                <div class="card service-card" data-category="company">
                     <div class="service-icon" style="color: #10b981;"><i class="fa-solid fa-cookie-bite"></i></div>
                     <h3>ตราสัญลักษณ์ PDPA Compliance</h3>
                     <p>จัดทำตราสัญลักษณ์และป๊อปอัปความยินยอมคุกกี้สำหรับเว็บไซต์ของคุณตามกฎหมาย PDPA พร้อมรับใบรับรองการติดตั้งดิจิทัล</p>
                     <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('PDPA')">ทำตราสัญลักษณ์ PDPA</button>
                 </div>
                 <!-- Director Change -->
-                <div class="card service-card">
+                <div class="card service-card" data-category="company">
                     <div class="service-icon" style="color: #6366f1;"><i class="fa-solid fa-user-gear"></i></div>
                     <h3>เปลี่ยนตัวกรรมการ / เปลี่ยนเจ้าของ</h3>
                     <p>บริการจดทะเบียนแต่งตั้ง/ถอดถอนกรรมการบริษัทจำกัด และแก้ไขข้อกำหนดอำนาจกรรมการลงชื่อผูกพันบริษัทให้เสร็จสิ้นภายใน 3 วัน</p>
                     <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('DIRECTOR_CHANGE')">เริ่มเปลี่ยนกรรมการ</button>
                 </div>
                 <!-- Shareholder Update -->
-                <div class="card service-card">
+                <div class="card service-card" data-category="company">
                     <div class="service-icon" style="color: #f59e0b;"><i class="fa-solid fa-users-viewfinder"></i></div>
                     <h3>แก้ไขรายชื่อผู้ถือหุ้น (บอจ.5)</h3>
-                    <p>บริการยื่นปรับปรุงสมุดทะเบียนรายชื่อผู้ถือหุ้นบริษัทจำกัดเพื่ออัปเดตสัดส่วนการโอนหุ้นและเพิ่มผู้ร่วมหุ้นอย่างเป็นทางการ</p>
+                    <p>บริการยื่นปรับปรุงสมุกทะเบียนรายชื่อผู้ถือหุ้นบริษัทจำกัดเพื่ออัปเดตสัดส่วนการโอนหุ้นและเพิ่มผู้ร่วมหุ้นอย่างเป็นทางการ</p>
                     <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('SHAREHOLDER_UPDATE')">อัปเดต บอจ.5</button>
                 </div>
 
                 <!-- Financial Audit -->
-                <div class="card service-card">
+                <div class="card service-card" data-category="company">
                     <div class="service-icon" style="color: #06b6d4;"><i class="fa-solid fa-user-check"></i></div>
                     <h3>ตรวจสอบงบการเงิน (CPA)</h3>
                     <p>บริการตรวจสอบงบแสดงฐานะการเงินและผลประกอบการโดยผู้สอบบัญชีรับอนุญาต (CPA) พร้อมเซ็นหน้ารายงานความเห็นอย่างถูกต้อง</p>
                     <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('FINANCIAL_AUDIT')">ส่งงบให้ผู้สอบบัญชี</button>
                 </div>
                 <!-- Financial Approval -->
-                <div class="card service-card">
+                <div class="card service-card" data-category="company">
                     <div class="service-icon" style="color: #a855f7;"><i class="fa-solid fa-comments"></i></div>
                     <h3>อนุมัติงบการเงิน (AGM Resolution)</h3>
                     <p>บริการจัดร่างประกาศหนังสือพิมพ์เชิญประชุมผู้ถือหุ้น จัดทำรายงานการประชุมอนุมัติงบและยื่นรายงานตามระเบียบ DBD</p>
                     <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('FINANCIAL_APPROVAL')">เริ่มจัดประชุมผู้ถือหุ้น</button>
+                </div>
+                <!-- Smart e-Tax Service -->
+                <div class="card service-card" data-category="company">
+                    <div class="service-icon" style="color: #0ea5e9;"><i class="fa-solid fa-file-invoice"></i></div>
+                    <h3>ระบบ Smart e-Tax Invoice</h3>
+                    <p>บริการจัดทำขอบข่าย สมัครใบรับรองอิเล็กทรอนิกส์ และติดตั้งระบบเชื่อมโยง API ส่งข้อมูลสรรพากรครบวงจร</p>
+                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('SMART_ETAX')">สมัครติดตั้ง e-Tax</button>
                 </div>
             </div>
         </div>
@@ -231,6 +247,7 @@
                         <li><a href="#" onclick="showWizard('financial-statement-prep')"><i class="fa-solid fa-chart-line"></i> จัดทำงบการเงินประจำปี</a></li>
                         <li><a href="#" onclick="showWizard('company-director-change')"><i class="fa-solid fa-user-gear"></i> เปลี่ยนตัวกรรมการ (เจ้าของ)</a></li>
                         <li><a href="#" onclick="showWizard('shareholder-update')"><i class="fa-solid fa-users-viewfinder"></i> แก้ไขรายชื่อผู้ถือหุ้น (บอจ.5)</a></li>
+                        <li><a href="#" onclick="showWizard('smart-etax')"><i class="fa-solid fa-file-invoice"></i> ระบบ Smart e-Tax Invoice</a></li>
                     </ul>
                 </div>
             </div>

@@ -8,9 +8,33 @@ let currentUploadFile = null;
 window.addEventListener('DOMContentLoaded', () => {
     checkSession();
     initializeDefaultWizards();
+    initializeFilterTags();
     // Default show landing page
     showSection('landing');
 });
+
+function initializeFilterTags() {
+    const tags = document.querySelectorAll('.btn-tag');
+    const cards = document.querySelectorAll('.service-card');
+    if (!tags.length) return;
+    
+    tags.forEach(tag => {
+        tag.addEventListener('click', () => {
+            tags.forEach(t => t.classList.remove('active'));
+            tag.classList.add('active');
+            
+            const filter = tag.getAttribute('data-filter');
+            cards.forEach(card => {
+                const category = card.getAttribute('data-category');
+                if (filter === 'all' || category === filter) {
+                    card.classList.remove('filtered-out');
+                } else {
+                    card.classList.add('filtered-out');
+                }
+            });
+        });
+    });
+}
 
 // Navigation state controller
 function showSection(sectionId) {
@@ -363,6 +387,8 @@ function selectServiceCatalog(catalogType) {
             showWizard('financial-audit');
         } else if (catalogType === 'FINANCIAL_APPROVAL') {
             showWizard('financial-approval');
+        } else if (catalogType === 'SMART_ETAX') {
+            showWizard('smart-etax');
         }
     }
 }
@@ -993,6 +1019,55 @@ function showWizard(serviceType) {
                 </div>
             </div>
         `;
+    } else if (serviceType === 'smart-etax') {
+        titleEl.innerHTML = '<i class="fa-solid fa-file-invoice text-primary"></i> บริการสมัครและติดตั้งระบบ Smart e-Tax Invoice & e-Receipt';
+        fieldsHtml = `
+            <div class="form-group">
+                <label>ชื่อนิติบุคคลผู้ขอติดตั้งระบบ / Company Name</label>
+                <input type="text" class="form-control" name="companyName" required placeholder="บริษัท เทคฟรอนเทียร์ จำกัด">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>เลขประจำตัวผู้เสียภาษีอากร 13 หลัก / Corporate Tax ID</label>
+                    <input type="text" class="form-control" name="taxId" required placeholder="01055xxxxxxxx" maxlength="13">
+                </div>
+                <div class="form-group">
+                    <label>อีเมลสำหรับติดต่อประสานงานระบบ / Contact Email</label>
+                    <input type="email" class="form-control" name="contactEmail" required placeholder="accounting@mycompany.com">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>ระบบ ERP หรือระบบออกบิลที่ใช้อยู่ปัจจุบัน / Current ERP System</label>
+                    <select class="form-control" name="erpSystem">
+                        <option value="FlowAccount">FlowAccount</option>
+                        <option value="Express">Express</option>
+                        <option value="Peak Account">Peak Account</option>
+                        <option value="ระบบทำมือ/Excel">ระบบทำมือ / Excel / Word</option>
+                        <option value="ระบบ Custom-built/เขียนเอง">ระบบ Custom-built / ERP เขียนเอง</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>จำนวนเอกสารออกบิลประมาณการต่อเดือน / Est. Monthly Invoices</label>
+                    <select class="form-control" name="invoiceVolume">
+                        <option value="น้อยกว่า 500 ใบ/เดือน">น้อยกว่า 500 ใบ/เดือน</option>
+                        <option value="500 - 2,000 ใบ/เดือน">500 - 2,000 ใบ/เดือน</option>
+                        <option value="2,000 - 10,000 ใบ/เดือน">2,000 - 10,000 ใบ/เดือน</option>
+                        <option value="มากกว่า 10,000 ใบ/เดือน">มากกว่า 10,000 ใบ/เดือน</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>ชื่อ-นามสกุล กรรมการผู้มีอำนาจลงนามสมัคร / Authorized Signatory</label>
+                <input type="text" class="form-control" name="authorizedSignatory" required placeholder="นายสมบัติ เจริญทรัพย์">
+            </div>
+            <div class="form-group" style="background: rgba(14, 165, 233, 0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(14, 165, 233, 0.2); font-size: 12px; margin-top: 15px;">
+                <span style="color: #0284c7; font-weight: bold;"><i class="fa-solid fa-circle-info"></i> ข้อมูลเพิ่มเติมเกี่ยวกับการขอสิทธิ:</span>
+                <p style="margin: 5px 0 0 0; font-size: 11px; line-height: 1.5; color: #475569;">
+                    ทีมงาน eDocman จะจัดทำเอกสารคำขอ บ.อ.01 พร้อมพัฒนาระบบเชื่อมโยงข้อมูลและเตรียมใบรับรองอิเล็กทรอนิกส์ (e-Tax Certificate) ร่วมกับสรรพากรให้แล้วเสร็จภายใน 7 วันทำการ
+                </p>
+            </div>
+        `;
     }
 
     fieldsContainer.innerHTML = fieldsHtml;
@@ -1417,6 +1492,7 @@ function mapWizardToServiceEnum(wizardId) {
         case 'shareholder-update': return 'SHAREHOLDER_UPDATE';
         case 'financial-audit': return 'FINANCIAL_STATEMENT_AUDIT';
         case 'financial-approval': return 'FINANCIAL_STATEMENT_APPROVAL';
+        case 'smart-etax': return 'SMART_ETAX';
         default: return 'COMPANY_NAME_RESERVATION';
     }
 }
@@ -1437,6 +1513,7 @@ function translateServiceType(enumVal) {
         case 'SHAREHOLDER_UPDATE': return 'แก้ไขรายชื่อผู้ถือหุ้น (บอจ.5)';
         case 'FINANCIAL_STATEMENT_AUDIT': return 'บริการตรวจสอบงบการเงินโดยผู้สอบบัญชี (CPA)';
         case 'FINANCIAL_STATEMENT_APPROVAL': return 'บริการจัดประชุมผู้ถือหุ้นอนุมัติงบการเงิน';
+        case 'SMART_ETAX': return 'บริการติดตั้งระบบ Smart e-Tax Invoice & e-Receipt';
         default: return enumVal;
     }
 }
