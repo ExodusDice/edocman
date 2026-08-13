@@ -102,6 +102,12 @@ public class DocumentGeneratorService {
             case FINANCIAL_STATEMENT_PREP:
                 generateFinancialStatementPrepHtml(html, order, data, customerName);
                 break;
+            case COMPANY_DIRECTOR_CHANGE:
+                generateCompanyDirectorChangeHtml(html, order, data, customerName);
+                break;
+            case SHAREHOLDER_UPDATE:
+                generateShareholderUpdateHtml(html, order, data, customerName);
+                break;
         }
 
         // Shared Footer Signatures
@@ -407,6 +413,80 @@ public class DocumentGeneratorService {
         html.append("    <div class=\"row\">\n");
         html.append("      <div class=\"col\"><span class=\"label\">ผู้ส่งงบ (CPA/TA) / CPA Assigned:</span> <span class=\"value\">" + data.getOrDefault("cpaName", "บริษัทจัดหาตรวจสอบบัญชี eDocman (CPA หุ้นส่วน)") + "</span></div>\n");
         html.append("    </div>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateCompanyDirectorChangeHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">คำขอจดทะเบียนแก้ไขเพิ่มเติมกรรมการและอำนาจกรรมการ (กรมพัฒนาธุรกิจการค้า)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลกิจการ / Corporate Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อบริษัท / Company Name:</span> <span class=\"value\">" + data.getOrDefault("companyName", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขทะเบียนนิติบุคคล / Registration ID:</span> <span class=\"value\">" + data.getOrDefault("companyId", "xxxxxxxxxxxxx") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">การเปลี่ยนแปลงรายชื่อกรรมการ / Director Amendments</div>\n");
+        html.append("    <p><strong>กรรมการที่ออก / Outgoing Director:</strong> <span class=\"value\" style=\"min-width:300px;\">" + data.getOrDefault("outgoingDirector", "-") + "</span></p>\n");
+        html.append("    <p><strong>กรรมการที่เข้าใหม่ (เจ้าของคนใหม่) / Incoming Director:</strong> <span class=\"value\" style=\"min-width:300px;\">" + data.getOrDefault("incomingDirector", "-") + "</span></p>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">การแก้ไขอำนาจกรรมการลงนาม / Authorized Signatory Power</div>\n");
+        html.append("    <p><span class=\"value\" style=\"width:100%; min-height:60px; display:block;\">" + data.getOrDefault("signatoryPower", "-") + "</span></p>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">มติที่ประชุม / Shareholder Meeting</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">วันที่จัดประชุม / Meeting Date:</span> <span class=\"value\">" + data.getOrDefault("resolutionDate", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateShareholderUpdateHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">บัญชีรายชื่อผู้ถือหุ้นของบริษัทจำกัด (แบบ บอจ.5)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">รายละเอียดนิติบุคคล / Corporate Info</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อบริษัท / Company Name:</span> <span class=\"value\">" + data.getOrDefault("companyName", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขทะเบียนนิติบุคคล / Registration ID:</span> <span class=\"value\">" + data.getOrDefault("companyId", "xxxxxxxxxxxxx") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ทุนจดทะเบียนรวม / Total Capital:</span> <span class=\"value\">" + data.getOrDefault("totalCapital", "-") + " บาท</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">จำนวนหุ้นทั้งหมด / Total Shares:</span> <span class=\"value\">" + data.getOrDefault("totalShares", "-") + " หุ้น</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">บัญชีรายชื่อผู้ถือหุ้นที่เพิ่มเติมหรือโอน / Shareholder List (บอจ.5 Update)</div>\n");
+        html.append("<table style=\"width:100%; border-collapse:collapse; margin-top:10px; font-size:12px;\">\n" +
+                "  <thead>\n" +
+                "    <tr style=\"background:#f1f5f9;\">\n" +
+                "      <th style=\"border:1px solid #ccc; padding:8px;\">ลำดับ / No.</th>\n" +
+                "      <th style=\"border:1px solid #ccc; padding:8px;\">ชื่อ-สกุล / Full Name</th>\n" +
+                "      <th style=\"border:1px solid #ccc; padding:8px;\">เลขประจำตัวประชาชน / ID</th>\n" +
+                "      <th style=\"border:1px solid #ccc; padding:8px;\">จำนวนหุ้นที่ถือ / Shares</th>\n" +
+                "    </tr>\n" +
+                "  </thead>\n" +
+                "  <tbody>\n" +
+                "    <tr>\n" +
+                "      <td style=\"border:1px solid #ccc; padding:8px; text-align:center;\">1</td>\n" +
+                "      <td style=\"border:1px solid #ccc; padding:8px;\">" + data.getOrDefault("shareholderName1", "-") + "</td>\n" +
+                "      <td style=\"border:1px solid #ccc; padding:8px; text-align:center;\">" + data.getOrDefault("shareholderId1", "-") + "</td>\n" +
+                "      <td style=\"border:1px solid #ccc; padding:8px; text-align:center;\">" + data.getOrDefault("shareholderShares1", "-") + " หุ้น</td>\n" +
+                "    </tr>\n" +
+                "    <tr>\n" +
+                "      <td style=\"border:1px solid #ccc; padding:8px; text-align:center;\">2</td>\n" +
+                "      <td style=\"border:1px solid #ccc; padding:8px;\">" + data.getOrDefault("shareholderName2", "-") + "</td>\n" +
+                "      <td style=\"border:1px solid #ccc; padding:8px; text-align:center;\">" + data.getOrDefault("shareholderId2", "-") + "</td>\n" +
+                "      <td style=\"border:1px solid #ccc; padding:8px; text-align:center;\">" + data.getOrDefault("shareholderShares2", "-") + " หุ้น</td>\n" +
+                "    </tr>\n" +
+                "  </tbody>\n" +
+                "</table>");
         html.append("  </div>\n");
     }
 }

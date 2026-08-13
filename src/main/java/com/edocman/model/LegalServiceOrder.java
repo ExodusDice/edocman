@@ -77,7 +77,9 @@ public class LegalServiceOrder {
         PDPA_BADGE_SETUP,
         COMPANY_NAME_CHANGE,
         MEMORANDUM_AMENDMENT,
-        FINANCIAL_STATEMENT_PREP
+        FINANCIAL_STATEMENT_PREP,
+        COMPANY_DIRECTOR_CHANGE,
+        SHAREHOLDER_UPDATE
     }
 
     public enum OrderStatus {

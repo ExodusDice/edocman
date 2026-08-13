@@ -168,6 +168,10 @@ public class OrderController {
                 return new BigDecimal("2900.00");
             case FINANCIAL_STATEMENT_PREP:
                 return new BigDecimal("4500.00");
+            case COMPANY_DIRECTOR_CHANGE:
+                return new BigDecimal("1900.00");
+            case SHAREHOLDER_UPDATE:
+                return new BigDecimal("1200.00");
             default:
                 return new BigDecimal("1000.00");
         }
