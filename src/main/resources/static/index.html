@@ -118,78 +118,183 @@
                 <p>เลือกบริการที่คุณต้องการทำรายการในรูปแบบออนไลน์ ไร้กระดาษ</p>
             </div>
 
-            <!-- Filter Tags -->
-            <div class="filter-tags">
-                <button class="btn-tag active" data-filter="all">ทั้งหมด / All</button>
-                <button class="btn-tag" data-filter="vehicle">Vehicle (ยานพาหนะ)</button>
-                <button class="btn-tag" data-filter="accounting-tax">Accounting & Tax (บัญชีและภาษี)</button>
-                <button class="btn-tag" data-filter="dbd-company">DBD & Company (จดทะเบียน & DBD)</button>
+            <!-- Filter Tags & Search bar -->
+            <div class="filter-search-container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin: 30px 0 25px 0;">
+                <div class="filter-tags" style="margin: 0; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn-tag active" data-filter="all">ทั้งหมด / All</button>
+                    <button class="btn-tag" data-filter="vehicle">Vehicle (ยานพาหนะ)</button>
+                    <button class="btn-tag" data-filter="accounting-tax">Accounting & Tax (บัญชีและภาษี)</button>
+                    <button class="btn-tag" data-filter="dbd-company">DBD & Company (จดทะเบียน & DBD)</button>
+                </div>
+                <div class="search-box" style="position: relative; max-width: 320px; width: 100%;">
+                    <input type="text" id="service-search-input" placeholder="ค้นหาบริการ..." style="width: 100%; padding: 10px 15px 10px 40px; border-radius: 30px; border: 1px solid var(--border-color); background-color: var(--bg-card); color: var(--text-light); font-size: 14px; font-family: var(--font-prompt); outline: none; transition: var(--transition);">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px;"></i>
+                </div>
             </div>
 
             <div class="grid-3">
                 <!-- DBD Services -->
                 <div class="card service-card" data-category="dbd-company">
-                    <div class="service-icon"><i class="fa-solid fa-building-flag"></i></div>
-                    <h3>บริการ DBD (กรมพัฒนาธุรกิจการค้า)</h3>
-                    <p>จองชื่อนิติบุคคล, คำขอจดทะเบียนจัดตั้งบริษัทจำกัด, บริการจดทะเบียนเลิกบริษัท และยื่นงบการเงิน e-Filing สะดวก รวดเร็ว</p>
-                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('DBD')">เปิดรายการ DBD</button>
+                    <div class="card-header-badge" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div class="service-icon" style="margin-bottom: 0;"><i class="fa-solid fa-building-flag"></i></div>
+                        <span class="badge badge-primary">Active</span>
+                    </div>
+                    <h3>บริการ DBD (กรมพัฒนาธุรกิจ)</h3>
+                    <p>บริการจดทะเบียนจัดตั้ง จองชื่อนิติบุคคลออนไลน์ เลิกและชำระบัญชี ตลอดจนคำขอจดทะเบียนครอบคลุมระเบียบ DBD</p>
+                    <ul class="card-features" style="list-style: none; margin: 15px 0 25px 0; padding: 0; font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> จองชื่อและตรวจความถูกต้อง</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ยื่นจดจัดตั้งบริษัทรวดเร็ว</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ยื่นคำร้องผ่านระบบอิเล็กทรอนิกส์</li>
+                    </ul>
+                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="btn btn-primary btn-sm" style="flex: 1.2;" onclick="selectServiceCatalog('DBD')">เปิดบริการ</button>
+                        <button class="btn btn-outline btn-sm" style="flex: 0.8;" onclick="alert('แสดงข้อมูลบริการ DBD: ครอบคลุมการยื่นขอจองชื่อบริษัทออนไลน์ ยื่นบอจ.1 และยื่นจดทะเบียนเลิกบริษัท')">รายละเอียด</button>
+                    </div>
                 </div>
                 <!-- Car Insurance -->
                 <div class="card service-card" data-category="vehicle">
-                    <div class="service-icon"><i class="fa-solid fa-car-burst"></i></div>
-                    <h3>ประกันภัยรถยนต์ พ.ร.บ. ภาคบังคับ</h3>
-                    <p>ซื้อ พ.ร.บ. ออนไลน์ คุ้มครองทันที รับเอกสารและกรมธรรม์ดิจิทัลพร้อมพิมพ์ หรือใช้ยื่นภาษีรถยนต์ประจำปีได้เลย</p>
-                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('CAR')">ทำรายการ พ.ร.บ.</button>
+                    <div class="card-header-badge" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div class="service-icon" style="margin-bottom: 0;"><i class="fa-solid fa-car-burst"></i></div>
+                        <span class="badge badge-primary">Active</span>
+                    </div>
+                    <h3>ประกันภัยรถยนต์ พ.ร.บ.</h3>
+                    <p>ซื้อ พ.ร.บ. ออนไลน์ คุ้มครองทันที รับเอกสารกรมธรรม์แบบดิจิทัลสำหรับพิมพ์ยื่นภาษีรถยนต์ประจำปีได้โดยตรง</p>
+                    <ul class="card-features" style="list-style: none; margin: 15px 0 25px 0; padding: 0; font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> คุ้มครองทันทีหลังจากชำระเงิน</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> กรมธรรม์อิเล็กทรอนิกส์ (e-Policy)</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ใช้ต่อภาษีทะเบียนรถประจำปีได้ทันที</li>
+                    </ul>
+                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="btn btn-primary btn-sm" style="flex: 1.2;" onclick="selectServiceCatalog('CAR')">ทำรายการ</button>
+                        <button class="btn btn-outline btn-sm" style="flex: 0.8;" onclick="alert('แสดงรายละเอียด พ.ร.บ.: ซื้อประกันภัยรถยนต์ภาคบังคับออนไลน์ราคาพิเศษ คุ้มครองทันที จัดส่งกรมธรรม์ทางอีเมลใน 1 นาที')">รายละเอียด</button>
+                    </div>
                 </div>
                 <!-- House Registration -->
                 <div class="card service-card" data-category="dbd-company">
-                    <div class="service-icon"><i class="fa-solid fa-house-chimney-window"></i></div>
-                    <h3>คำร้องทะเบียนบ้าน (ที่อยู่/ปรับปรุง)</h3>
-                    <p>แก้ไขข้อมูลทะเบียนบ้าน ยื่นย้ายเข้า-ย้ายออก แจ้งข้อมูลคนในบ้านผ่านระบบออนไลน์ พร้อมแนบโฉนดและบัตรในรูปแบบดิจิทัล</p>
-                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('HOUSE')">แจ้งแก้ไขทะเบียนบ้าน</button>
+                    <div class="card-header-badge" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div class="service-icon" style="margin-bottom: 0;"><i class="fa-solid fa-house-chimney-window"></i></div>
+                        <span class="badge badge-primary">Active</span>
+                    </div>
+                    <h3>คำร้องทะเบียนบ้าน (ที่อยู่/ย้ายเข้า)</h3>
+                    <p>ยื่นคำร้องย้ายเข้า แจ้งย้ายออก หรือขอแก้ไขข้อมูลทะเบียนบ้านออนไลน์ รวดเร็ว ไม่ต้องรอคิวที่สำนักงานเขต</p>
+                    <ul class="card-features" style="list-style: none; margin: 15px 0 25px 0; padding: 0; font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> แจ้งย้ายเข้า-ออกอิเล็กทรอนิกส์</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> แนบโฉนดเอกสารดิจิทัลปลอดภัย</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ตรวจสอบผลอนุมัติผ่าน SMS/อีเมล</li>
+                    </ul>
+                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="btn btn-primary btn-sm" style="flex: 1.2;" onclick="selectServiceCatalog('HOUSE')">ยื่นแก้ไข</button>
+                        <button class="btn btn-outline btn-sm" style="flex: 0.8;" onclick="alert('แสดงข้อมูลคำร้องทะเบียนบ้าน: ยื่นแจ้งย้ายเข้า ย้ายออก ปรับปรุงข้อมูลทะเบียนบ้าน ปฏิบัติงานแบบดิจิทัลครบวงจร')">รายละเอียด</button>
+                    </div>
                 </div>
                 <!-- PDPA Badge Service -->
                 <div class="card service-card" data-category="dbd-company">
-                    <div class="service-icon" style="color: #10b981;"><i class="fa-solid fa-cookie-bite"></i></div>
+                    <div class="card-header-badge" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div class="service-icon" style="margin-bottom: 0; color: #10b981;"><i class="fa-solid fa-cookie-bite"></i></div>
+                        <span class="badge badge-success">Compliance</span>
+                    </div>
                     <h3>ตราสัญลักษณ์ PDPA Compliance</h3>
-                    <p>จัดทำตราสัญลักษณ์และป๊อปอัปความยินยอมคุกกี้สำหรับเว็บไซต์ของคุณตามกฎหมาย PDPA พร้อมรับใบรับรองการติดตั้งดิจิทัล</p>
-                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('PDPA')">ทำตราสัญลักษณ์ PDPA</button>
+                    <p>จัดทำตราสัญลักษณ์ ป๊อปอัปความยินยอมคุกกี้ และเอกสารความเป็นส่วนตัวบนเว็บไซต์ของคุณให้ถูกต้องตามเกณฑ์กฎหมาย</p>
+                    <ul class="card-features" style="list-style: none; margin: 15px 0 25px 0; padding: 0; font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ป๊อปอัปยินยอมคุกกี้อัตโนมัติ</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> เอกสารนโยบายคุ้มครองข้อมูล</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ตราสัญลักษณ์รับรองความสอดคล้อง</li>
+                    </ul>
+                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="btn btn-primary btn-sm" style="flex: 1.2;" onclick="selectServiceCatalog('PDPA')">ทำตราสัญลักษณ์</button>
+                        <button class="btn btn-outline btn-sm" style="flex: 0.8;" onclick="alert('แสดงข้อมูล PDPA Compliance: บริการติดตั้ง Cookie Consent Banner พร้อมร่างไฟล์นโยบายความเป็นส่วนตัว (Privacy Policy)')">รายละเอียด</button>
+                    </div>
                 </div>
                 <!-- Director Change -->
                 <div class="card service-card" data-category="dbd-company">
-                    <div class="service-icon" style="color: #6366f1;"><i class="fa-solid fa-user-gear"></i></div>
+                    <div class="card-header-badge" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div class="service-icon" style="margin-bottom: 0; color: #6366f1;"><i class="fa-solid fa-user-gear"></i></div>
+                        <span class="badge badge-success">Approved</span>
+                    </div>
                     <h3>เปลี่ยนตัวกรรมการ / เปลี่ยนเจ้าของ</h3>
-                    <p>บริการจดทะเบียนแต่งตั้ง/ถอดถอนกรรมการบริษัทจำกัด และแก้ไขข้อกำหนดอำนาจกรรมการลงชื่อผูกพันบริษัทให้เสร็จสิ้นภายใน 3 วัน</p>
-                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('DIRECTOR_CHANGE')">เริ่มเปลี่ยนกรรมการ</button>
+                    <p>บริการจดทะเบียนแต่งตั้ง/ถอดถอนกรรมการบริษัทจำกัด และแก้ไขกำหนดอำนาจกรรมการลงชื่อเสร็จสิ้นใน 3 วันทำการ</p>
+                    <ul class="card-features" style="list-style: none; margin: 15px 0 25px 0; padding: 0; font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> จัดเตรียมคำร้องจดทะเบียน บอจ.3/4</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ร่างรายงานการประชุมผู้ถือหุ้น</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ยื่นจดทะเบียนต่อ DBD จนเสร็จสมบูรณ์</li>
+                    </ul>
+                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="btn btn-primary btn-sm" style="flex: 1.2;" onclick="selectServiceCatalog('DIRECTOR_CHANGE')">เปลี่ยนกรรมการ</button>
+                        <button class="btn btn-outline btn-sm" style="flex: 0.8;" onclick="alert('แสดงข้อมูลเปลี่ยนกรรมการ: บริการยื่นเอกสาร บอจ.3 หรือ บอจ.4 เพื่อแต่งตั้ง ถอดถอน หรือแก้ไขอำนาจการลงนามของกรรมการ')">รายละเอียด</button>
+                    </div>
                 </div>
                 <!-- Shareholder Update -->
                 <div class="card service-card" data-category="dbd-company">
-                    <div class="service-icon" style="color: #f59e0b;"><i class="fa-solid fa-users-viewfinder"></i></div>
+                    <div class="card-header-badge" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div class="service-icon" style="margin-bottom: 0; color: #f59e0b;"><i class="fa-solid fa-users-viewfinder"></i></div>
+                        <span class="badge badge-success">Approved</span>
+                    </div>
                     <h3>แก้ไขรายชื่อผู้ถือหุ้น (บอจ.5)</h3>
-                    <p>บริการยื่นปรับปรุงสมุกทะเบียนรายชื่อผู้ถือหุ้นบริษัทจำกัดเพื่ออัปเดตสัดส่วนการโอนหุ้นและเพิ่มผู้ร่วมหุ้นอย่างเป็นทางการ</p>
-                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('SHAREHOLDER_UPDATE')">อัปเดต บอจ.5</button>
+                    <p>บริการจัดทำและนำส่งบัญชีรายชื่อผู้ถือหุ้น (บอจ.5) เล่มใหม่เพื่ออัปเดตสัดส่วนผู้ถือหุ้นและโอนย้ายหุ้นอย่างเป็นทางการ</p>
+                    <ul class="card-features" style="list-style: none; margin: 15px 0 25px 0; padding: 0; font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ทะเบียนผู้ถือหุ้นฉบับอัปเดตล่าสุด</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ใบโอนหุ้นพร้อมลงลายมือชื่อ</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ยื่นนำส่ง DBD บอจ.5 แบบดิจิทัล</li>
+                    </ul>
+                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="btn btn-primary btn-sm" style="flex: 1.2;" onclick="selectServiceCatalog('SHAREHOLDER_UPDATE')">อัปเดต บอจ.5</button>
+                        <button class="btn btn-outline btn-sm" style="flex: 0.8;" onclick="alert('แสดงข้อมูลอัปเดต บอจ.5: บริการร่างสัญญาโอนหุ้น ใบโอนหุ้น และจัดส่งสมุกทะเบียนรายชื่อผู้ถือหุ้น บอจ.5 เล่มใหม่ส่ง DBD')">รายละเอียด</button>
+                    </div>
                 </div>
 
                 <!-- Financial Audit -->
                 <div class="card service-card" data-category="accounting-tax">
-                    <div class="service-icon" style="color: #06b6d4;"><i class="fa-solid fa-user-check"></i></div>
+                    <div class="card-header-badge" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div class="service-icon" style="margin-bottom: 0; color: #06b6d4;"><i class="fa-solid fa-user-check"></i></div>
+                        <span class="badge badge-warning">Pending</span>
+                    </div>
                     <h3>ตรวจสอบงบการเงิน (CPA)</h3>
-                    <p>บริการตรวจสอบงบแสดงฐานะการเงินและผลประกอบการโดยผู้สอบบัญชีรับอนุญาต (CPA) พร้อมเซ็นหน้ารายงานความเห็นอย่างถูกต้อง</p>
-                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('FINANCIAL_AUDIT')">ส่งงบให้ผู้สอบบัญชี</button>
+                    <p>บริการตรวจสอบงบแสดงฐานะการเงินและผลการดำเนินงานโดยผู้สอบบัญชีรับอนุญาต (CPA) เซ็นรับรองอย่างถูกต้อง</p>
+                    <ul class="card-features" style="list-style: none; margin: 15px 0 25px 0; padding: 0; font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ตรวจสอบงบแสดงผลฐานะและรายได้</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> หน้ารายงานความเห็นผู้สอบบัญชี (CPA)</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ถูกต้องตามข้อกำหนดสภาวิชาชีพบัญชี</li>
+                    </ul>
+                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="btn btn-primary btn-sm" style="flex: 1.2;" onclick="selectServiceCatalog('FINANCIAL_AUDIT')">ส่งงบให้ผู้สอบ</button>
+                        <button class="btn btn-outline btn-sm" style="flex: 0.8;" onclick="alert('แสดงข้อมูลผู้สอบบัญชี CPA: บริการวิเคราะห์ความถูกต้องของงบดุล รายการเงินฝาก งบกำไรขาดทุน และจัดทำรายงานรับรองงบประจำปี')">รายละเอียด</button>
+                    </div>
                 </div>
                 <!-- Financial Approval -->
                 <div class="card service-card" data-category="accounting-tax">
-                    <div class="service-icon" style="color: #a855f7;"><i class="fa-solid fa-comments"></i></div>
+                    <div class="card-header-badge" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div class="service-icon" style="margin-bottom: 0; color: #a855f7;"><i class="fa-solid fa-comments"></i></div>
+                        <span class="badge badge-warning">Pending</span>
+                    </div>
                     <h3>อนุมัติงบการเงิน (AGM Resolution)</h3>
-                    <p>บริการจัดร่างประกาศหนังสือพิมพ์เชิญประชุมผู้ถือหุ้น จัดทำรายงานการประชุมอนุมัติงบและยื่นรายงานตามระเบียบ DBD</p>
-                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('FINANCIAL_APPROVAL')">เริ่มจัดประชุมผู้ถือหุ้น</button>
+                    <p>บริการร่างประกาศเชิญประชุมผู้ถือหุ้นลงโฆษณาหนังสือพิมพ์ จัดทำรายงานประชุมอนุมัติงบและยื่นรายงานมติประชุมตามกฎหมาย</p>
+                    <ul class="card-features" style="list-style: none; margin: 15px 0 25px 0; padding: 0; font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> หนังสือพิมพ์ลงประกาศโฆษณาประชุม</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> จัดเตรียมหนังสือนัดประชุมผู้ถือหุ้น (AGM)</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> รายงานการประชุมอนุมัติงบการเงิน</li>
+                    </ul>
+                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="btn btn-primary btn-sm" style="flex: 1.2;" onclick="selectServiceCatalog('FINANCIAL_APPROVAL')">เริ่มประชุม AGM</button>
+                        <button class="btn btn-outline btn-sm" style="flex: 0.8;" onclick="alert('แสดงข้อมูลอนุมัติงบ AGM: ดำเนินพิธีประกาศหนังสือพิมพ์ ส่งจดหมายเชิญประชุมผู้ถือหุ้น และสรุปมติอนุมัติงบการเงินประจำปี')">รายละเอียด</button>
+                    </div>
                 </div>
                 <!-- Smart e-Tax Service -->
                 <div class="card service-card" data-category="accounting-tax">
-                    <div class="service-icon" style="color: #0ea5e9;"><i class="fa-solid fa-file-invoice"></i></div>
+                    <div class="card-header-badge" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                        <div class="service-icon" style="margin-bottom: 0; color: #0ea5e9;"><i class="fa-solid fa-file-invoice"></i></div>
+                        <span class="badge badge-warning" style="background-color: rgba(217, 119, 6, 0.15); color: var(--primary);">New</span>
+                    </div>
                     <h3>ระบบ Smart e-Tax Invoice</h3>
-                    <p>บริการจัดทำขอบข่าย สมัครใบรับรองอิเล็กทรอนิกส์ และติดตั้งระบบเชื่อมโยง API ส่งข้อมูลสรรพากรครบวงจร</p>
-                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('SMART_ETAX')">สมัครติดตั้ง e-Tax</button>
+                    <p>บริการจัดทำคำร้อง บ.อ.01 ขอใบรับรองอิเล็กทรอนิกส์ (e-Tax Certificate) และพัฒนาติดตั้ง API เชื่อมต่อสรรพากรแบบครบวงจร</p>
+                    <ul class="card-features" style="list-style: none; margin: 15px 0 25px 0; padding: 0; font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ยื่นคำร้องขอสิทธิ บ.อ.01 สรรพากร</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> จัดหาและเตรียม e-Tax Certificate</li>
+                        <li><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 8px;"></i> ลิงก์ API นำส่งไฟล์ XML/PDF อัตโนมัติ</li>
+                    </ul>
+                    <div style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="btn btn-primary btn-sm" style="flex: 1.2;" onclick="selectServiceCatalog('SMART_ETAX')">สมัครติดตั้ง</button>
+                        <button class="btn btn-outline btn-sm" style="flex: 0.8;" onclick="alert('แสดงข้อมูลระบบ Smart e-Tax: บริการขึ้นทะเบียน บ.อ.01 เพื่อออกใบกำกับภาษีอิเล็กทรอนิกส์ และเชื่อมโยงฐานข้อมูลออกบิลเข้าสรรพากร')">รายละเอียด</button>
+                    </div>
                 </div>
             </div>
         </div>
