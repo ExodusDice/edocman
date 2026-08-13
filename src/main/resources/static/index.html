@@ -40,19 +40,18 @@
                 <a href="#services" onclick="showSection('landing')">บริการของเรา</a>
                 <a href="#how-it-works" onclick="showSection('landing')">ขั้นตอนใช้งาน</a>
                 <a href="#" id="nav-dashboard-link" class="hidden" onclick="showSection('dashboard')">แดชบอร์ด</a>
-                <a href="#" id="nav-admin-link" onclick="showSection('admin')">รัฐบาล (จำลอง)</a>
+                <a href="#" id="nav-admin-link" onclick="showSection('admin')">ระบบแอดมิน / รัฐบาล</a>
             </nav>
 
             <div class="auth-buttons">
-                <!-- Clerk auth triggers will be hooked here -->
                 <div id="clerk-auth-container">
-                    <button class="btn btn-outline" onclick="simulateLogin('user_mock_123', 'สมชาย รักชาติ', 'somchai@email.com')">
-                        <i class="fa-solid fa-sign-in"></i> เข้าสู่ระบบ (จำลอง)
+                    <button class="btn btn-outline" onclick="openAuthModal('signin')">
+                        <i class="fa-solid fa-user"></i> เข้าสู่ระบบ / สมัครสมาชิก
                     </button>
                 </div>
                 <div id="user-profile-container" class="hidden">
-                    <span id="user-display-name">คุณสมชาย</span>
-                    <button class="btn btn-sm btn-danger" onclick="simulateLogout()">ออกจากระบบ</button>
+                    <span id="user-display-name">-</span>
+                    <button class="btn btn-sm btn-danger" onclick="executeLogout()">ออกจากระบบ</button>
                 </div>
             </div>
         </div>
@@ -316,61 +315,303 @@
 
                 <input type="hidden" id="payment-target-order-id">
                 <button class="btn btn-primary btn-block btn-lg" style="margin-top:20px;" onclick="executePayment()">
-                    <i class="fa-solid fa-lock"></i> ชำระเงินสุทธิอย่างปลอดภัย (Stripe Mock)
+                    <i class="fa-solid fa-lock"></i> ชำระเงินสุทธิอย่างปลอดภัย (Stripe Dynamic)
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- SECTION 5: Mock Government Officer Portal / Admin Panel -->
+    <!-- SECTION 5: Admin Console & Mock Government Portal -->
     <section id="admin-section" class="app-section hidden">
         <div class="container">
-            <div class="card card-premium">
-                <div class="card-header-flex">
-                    <h2><i class="fa-solid fa-gavel text-primary"></i> แดชบอร์ดตรวจสอบสำหรับภาครัฐ (จำลอง)</h2>
-                    <span class="badge badge-warning">ระบบทดสอบ (Sandboxed Environment)</span>
+            <!-- 5a. Admin Login Panel (Shown when not authenticated as admin) -->
+            <div id="admin-login-panel" class="card max-width-600" style="margin: 40px auto;">
+                <div style="text-align:center; margin-bottom:30px;">
+                    <i class="fa-solid fa-user-gear text-primary" style="font-size:48px;"></i>
+                    <h2 style="margin-top:10px;">ลงชื่อเข้าใช้คอนโซลแอดมิน (sadminwa)</h2>
+                    <p class="text-muted">ใช้บัญชีผู้ดูแลระบบกลางเพื่อตรวจสอบฐานลูกค้าและการตั้งค่าจำลอง</p>
                 </div>
-                <p>พอร์ทัลส่วนงานราชการเพื่อกด "อนุมัติ / ออกเอกสารจริง" เพื่อจำลองลูปธุรกรรมและดูการทำงานของ FlowAccount API + Resend Email</p>
-                
-                <div class="admin-orders-table-wrapper">
-                    <table class="table" id="admin-orders-table">
-                        <thead>
-                            <tr>
-                                <th>OrderID</th>
-                                <th>ชื่อลูกค้า</th>
-                                <th>ประเภทบริการ</th>
-                                <th>สถานะยอดเงิน</th>
-                                <th>การเชื่อม FlowAccount</th>
-                                <th>สถานะคำขอภาครัฐ</th>
-                                <th>การดำเนินงาน (Actions)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-orders-tbody">
-                            <!-- Populated dynamically via app.js -->
-                        </tbody>
-                    </table>
-                </div>
+                <form onsubmit="handleAdminLogin(event)">
+                    <div class="form-group">
+                        <label>ชื่อผู้ใช้งาน / Username</label>
+                        <input type="text" id="admin-username-input" class="form-control" required placeholder="sadminwa" value="sadminwa">
+                    </div>
+                    <div class="form-group">
+                        <label>รหัสผ่าน / Password</label>
+                        <input type="password" id="admin-password-input" class="form-control" required placeholder="รหัสผ่าน" value="sadminwa">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">เข้าสู่ระบบการจัดการ</button>
+                </form>
             </div>
-            
-            <!-- FlowAccount Sync details panel -->
-            <div class="card" style="margin-top:20px;" id="flowaccount-audit-card">
-                <h3><i class="fa-solid fa-receipt text-success"></i> บันทึกการเชื่อมต่อบัญชี FlowAccount API Audit Log</h3>
-                <p class="text-muted">คลิกเลือกคำร้องในตารางเพื่อดูการแลกเปลี่ยน JSON Payload ระหว่าง Java Backend กับ FlowAccount API</p>
-                <div id="flowaccount-log-details" class="hidden">
-                    <div class="row-flex font-mono bg-dark-code">
-                        <div style="flex:1; padding:10px;">
-                            <strong>JSON Request Sent to FlowAccount</strong>
-                            <pre id="fa-log-request"></pre>
+
+            <!-- 5b. Admin Dashboard Console (Shown when admin logged in) -->
+            <div id="admin-dashboard-panel" class="hidden">
+                <div class="card card-premium">
+                    <div class="card-header-flex">
+                        <h2><i class="fa-solid fa-gears text-primary"></i> eDocman Administration Console</h2>
+                        <div>
+                            <span class="badge badge-success">Logged in as SuperAdmin (sadminwa)</span>
+                            <button class="btn btn-danger btn-sm" onclick="executeLogout()" style="margin-left:10px;">ออกจากระบบแอดมิน</button>
                         </div>
-                        <div style="flex:1; padding:10px; border-left: 1px solid #334155;">
-                            <strong>JSON Response Received</strong>
-                            <pre id="fa-log-response"></pre>
+                    </div>
+                    
+                    <!-- Admin Navigation Tabs -->
+                    <div class="admin-tabs">
+                        <button class="admin-tab-btn active" onclick="switchAdminTab('orders-tab')"><i class="fa-solid fa-gavel"></i> ตรวจสอบเอกสารราชการ</button>
+                        <button class="admin-tab-btn" onclick="switchAdminTab('users-tab')"><i class="fa-solid fa-users"></i> ทะเบียนบัญชีลูกค้า</button>
+                        <button class="admin-tab-btn" onclick="switchAdminTab('settings-tab')"><i class="fa-solid fa-sliders"></i> ตั้งค่าเชื่อมต่อ SaaS (Mock/Live)</button>
+                    </div>
+
+                    <!-- TAB 1: Government orders approval list -->
+                    <div id="admin-tab-orders-tab" class="admin-tab-content">
+                        <h3>รายการส่งเอกสารภาครัฐทั้งหมด</h3>
+                        <div class="admin-orders-table-wrapper">
+                            <table class="table" id="admin-orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>OrderID</th>
+                                        <th>ชื่อลูกค้า</th>
+                                        <th>ประเภทบริการ</th>
+                                        <th>สถานะยอดเงิน</th>
+                                        <th>การเชื่อม FlowAccount</th>
+                                        <th>สถานะคำขอภาครัฐ</th>
+                                        <th>การดำเนินงาน (Actions)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-orders-tbody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: Customer list panel -->
+                    <div id="admin-tab-users-tab" class="admin-tab-content hidden">
+                        <h3>รายชื่อลูกค้าที่ลงทะเบียนในระบบ</h3>
+                        <div class="admin-orders-table-wrapper">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Clerk User ID</th>
+                                        <th>ชื่อ-นามสกุล</th>
+                                        <th>อีเมล</th>
+                                        <th>เบอร์โทรศัพท์</th>
+                                        <th>PDPA Consent</th>
+                                        <th>วันที่ยินยอม (PDPA)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-tbody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: SaaS live settings simulator switches -->
+                    <div id="admin-tab-settings-tab" class="admin-tab-content hidden">
+                        <h3>การจำลองการทำงานระบบภายนอก (Simulation Config)</h3>
+                        <p class="text-muted">สลับเปิด/ปิด เพื่อเปิดใช้งานจำลอง (Simulation Mode) หรือเรียกใช้งานคีย์ API จริงผ่าน Properties</p>
+                        
+                        <div class="settings-grid-switches" style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                            <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
+                                <div class="row-flex">
+                                    <div>
+                                        <strong>Stripe Payment Gateway</strong>
+                                        <p class="form-help-text" style="margin:0;">จำลองความสำเร็จของบัตร/PromptPay โดยไม่ต้องใช้ Key จริง</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="sim-toggle-stripe" onchange="toggleSimSetting('stripe', this.checked)">
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
+                                <div class="row-flex">
+                                    <div>
+                                        <strong>Supabase File Storage</strong>
+                                        <p class="form-help-text" style="margin:0;">เก็บภาพบัตร/โฉนดไว้ในเครื่องโลคัลแทน bucket จริง</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="sim-toggle-supabase" onchange="toggleSimSetting('supabase', this.checked)">
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
+                                <div class="row-flex">
+                                    <div>
+                                        <strong>Resend Email Notifications</strong>
+                                        <p class="form-help-text" style="margin:0;">แสดงผลลัพธ์อีเมลในคอนโซลแทนการส่งจริงเข้าเมลบ็อกซ์</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="sim-toggle-resend" onchange="toggleSimSetting('resend', this.checked)">
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
+                                <div class="row-flex">
+                                    <div>
+                                        <strong>FlowAccount Accounting API</strong>
+                                        <p class="form-help-text" style="margin:0;">สร้างใบส่งของ/ใบเสร็จภาษีแบบจำลองและเก็บบันทึก Audit JSON</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="sim-toggle-flowaccount" onchange="toggleSimSetting('flowaccount', this.checked)">
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shared FlowAccount Sync details panel -->
+                <div class="card" style="margin-top:20px;" id="flowaccount-audit-card">
+                    <h3><i class="fa-solid fa-receipt text-success"></i> บันทึกการเชื่อมต่อบัญชี FlowAccount API Audit Log</h3>
+                    <p class="text-muted">คลิกปุ่ม "Synced (Audit)" ในแถวคำร้องเพื่อเปิดตรวจสอบ JSON Request/Response แบบเรียลไทม์</p>
+                    <div id="flowaccount-log-details" class="hidden">
+                        <div class="row-flex font-mono bg-dark-code">
+                            <div style="flex:1; padding:10px;">
+                                <strong>JSON Request Sent to FlowAccount</strong>
+                                <pre id="fa-log-request"></pre>
+                            </div>
+                            <div style="flex:1; padding:10px; border-left: 1px solid #334155;">
+                                <strong>JSON Response Received</strong>
+                                <pre id="fa-log-response"></pre>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- PREMIUM AUTHENTICATION OVERLAY MODAL -->
+    <div id="auth-overlay" class="modal-overlay hidden">
+        <div class="modal-card max-width-500">
+            <div class="modal-header">
+                <h3 id="auth-modal-title">เข้าสู่ระบบ eDocman</h3>
+                <button class="btn-close" onclick="closeAuthModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- 1. SIGN IN PANEL -->
+                <div id="auth-panel-signin" class="auth-panel">
+                    <!-- Clerk Dynamic mount slot -->
+                    <div id="clerk-signin-box" style="display:none; width:100%; justify-content:center;"></div>
+                    
+                    <!-- Native FinCommerce Auth form -->
+                    <form id="native-login-form" onsubmit="handleNativeLogin(event)">
+                        <!-- Social login grid -->
+                        <div class="social-grid">
+                            <button type="button" class="btn btn-outline btn-block" onclick="handleSocialMockLogin('Google')">
+                                <i class="fa-brands fa-google text-danger"></i> Sign in with Google
+                            </button>
+                            <button type="button" class="btn btn-outline btn-block" onclick="handleSocialMockLogin('Apple')">
+                                <i class="fa-brands fa-apple"></i> Sign in with Apple
+                            </button>
+                        </div>
+                        <div class="divider-text"><span>หรือใช้บัญชีอีเมล</span></div>
+
+                        <div class="form-group">
+                            <label>ที่อยู่อีเมล / Email Address</label>
+                            <input type="email" id="login-email" class="form-control" required placeholder="name@email.com">
+                        </div>
+                        <div class="form-group">
+                            <div class="row-flex">
+                                <label>รหัสผ่าน / Password</label>
+                                <a href="#" class="forgot-link text-primary" onclick="openAuthModal('forgot')">ลืมรหัสผ่าน?</a>
+                            </div>
+                            <input type="password" id="login-password" class="form-control" required placeholder="กรอกรหัสผ่าน">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">เข้าสู่ระบบความปลอดภัย</button>
+                    </form>
+                    
+                    <div style="text-align:center; margin-top:20px; font-size:14px;">
+                        <span>ยังไม่มีบัญชีใช่หรือไม่?</span>
+                        <a href="#" class="text-primary" onclick="openAuthModal('signup')">สมัครสมาชิกฟรี</a>
+                    </div>
+                </div>
+
+                <!-- 2. SIGN UP PANEL -->
+                <div id="auth-panel-signup" class="auth-panel hidden">
+                    <!-- Clerk Dynamic register mount slot -->
+                    <div id="clerk-signup-box" style="display:none; width:100%; justify-content:center;"></div>
+
+                    <form id="native-register-form" onsubmit="handleNativeRegister(event)">
+                        <div class="form-group">
+                            <label>ชื่อ-นามสกุล / Full Name</label>
+                            <input type="text" id="reg-name" class="form-control" required placeholder="นายสมชาย รักชาติ">
+                        </div>
+                        <div class="form-group">
+                            <label>ที่อยู่อีเมล / Email Address</label>
+                            <input type="email" id="reg-email" class="form-control" required placeholder="name@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>เบอร์โทรศัพท์มือถือ / Mobile Phone</label>
+                            <input type="text" id="reg-phone" class="form-control" required placeholder="08xxxxxxxx">
+                        </div>
+                        <div class="form-group">
+                            <label>รหัสผ่านความปลอดภัย / Password</label>
+                            <input type="password" id="reg-password" class="form-control" required placeholder="อย่างน้อย 6 ตัวอักษร" minlength="6">
+                        </div>
+                        <div class="form-group" style="display:flex; gap:10px; align-items:flex-start;">
+                            <input type="checkbox" id="reg-pdpa" required style="margin-top:4px;">
+                            <label for="reg-pdpa" style="font-size:12px; line-height:1.4;">ฉันยอมรับข้อตกลงและนโยบายความเป็นส่วนตัวตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA)</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">ลงทะเบียนบัญชีใหม่</button>
+                    </form>
+                    
+                    <div style="text-align:center; margin-top:20px; font-size:14px;">
+                        <span>มีบัญชีอยู่แล้วใช่หรือไม่?</span>
+                        <a href="#" class="text-primary" onclick="openAuthModal('signin')">เข้าสู่ระบบ</a>
+                    </div>
+                </div>
+
+                <!-- 3. FORGOT PASSWORD PANEL -->
+                <div id="auth-panel-forgot" class="auth-panel hidden">
+                    <p class="text-muted" style="font-size:13px; margin-bottom:20px;">กรอกที่อยู่อีเมลของคุณด้านล่าง ระบบจะจัดส่งรหัสและลิงก์รีเซ็ตรหัสผ่านใหม่ผ่านระบบ Resend API</p>
+                    <form id="native-forgot-form" onsubmit="handleNativeForgot(event)">
+                        <div class="form-group">
+                            <label>ที่อยู่อีเมล / Email Address</label>
+                            <input type="email" id="forgot-email" class="form-control" required placeholder="name@email.com">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">ขอลิงก์รีเซ็ตรหัสผ่าน</button>
+                    </form>
+                    <div style="text-align:center; margin-top:20px;">
+                        <a href="#" class="text-primary" onclick="openAuthModal('signin')"><i class="fa-solid fa-arrow-left"></i> ย้อนกลับไปเข้าสู่ระบบ</a>
+                    </div>
+                </div>
+
+                <!-- 4. 2FA CODE PANEL -->
+                <div id="auth-panel-mfa" class="auth-panel hidden">
+                    <div style="text-align:center; margin-bottom:20px;">
+                        <i class="fa-solid fa-envelope-open-text text-primary" style="font-size:40px;"></i>
+                        <h4 style="margin-top:10px;">การตรวจสอบสองขั้นตอน (2FA Verified)</h4>
+                        <p class="text-muted" style="font-size:12px; margin-top:5px;">เราได้ส่งรหัสผ่าน 6 หลักไปให้คุณที่: <strong id="mfa-target-email">-</strong></p>
+                    </div>
+                    
+                    <!-- 2FA OTP Digits Code boxes -->
+                    <div class="otp-boxes-container">
+                        <input type="text" class="otp-box" maxlength="1" oninput="handleOtpFocus(this, 1)" id="otp-1">
+                        <input type="text" class="otp-box" maxlength="1" oninput="handleOtpFocus(this, 2)" id="otp-2">
+                        <input type="text" class="otp-box" maxlength="1" oninput="handleOtpFocus(this, 3)" id="otp-3">
+                        <input type="text" class="otp-box" maxlength="1" oninput="handleOtpFocus(this, 4)" id="otp-4">
+                        <input type="text" class="otp-box" maxlength="1" oninput="handleOtpFocus(this, 5)" id="otp-5">
+                        <input type="text" class="otp-box" maxlength="1" oninput="handleOtpFocus(this, 6)" id="otp-6">
+                    </div>
+
+                    <button class="btn btn-primary btn-block btn-lg" style="margin-top:25px;" onclick="submitNativeMfa()">ยืนยันความปลอดภัยเข้าระบบ</button>
+                    
+                    <div style="text-align:center; margin-top:20px; font-size:13px;" class="text-muted">
+                        <span>ไม่ได้รับรหัส OTP ใช่หรือไม่? </span>
+                        <a href="#" class="text-primary" id="otp-resend-btn" onclick="resendMfaCode()">ส่งรหัสอีกครั้ง (<span id="otp-cooldown-timer">60</span>s)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- FLOATING COMPLIANCE COMPONENTS -->
     <!-- Termly compliance mock links in footer -->
@@ -433,6 +674,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Script Application -->
+    <script src="/app.js"></script>
 
 </body>
 </html>

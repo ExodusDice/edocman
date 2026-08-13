@@ -18,15 +18,31 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String clerkUserId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
+
+    private String password;
 
     private String fullName;
 
     private String phone;
+
+    @Column(nullable = false)
+    private String role = "CUSTOMER"; // CUSTOMER or ADMIN
+
+    @Column(nullable = false)
+    private boolean twoFactorEnabled = true;
+
+    private String otpCode;
+
+    private LocalDateTime otpExpiry;
+
+    private String resetToken;
+
+    private LocalDateTime resetTokenExpiry;
 
     @Column(nullable = false)
     private boolean pdpaConsented = false;
@@ -41,6 +57,7 @@ public class User {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (role == null) role = "CUSTOMER";
     }
 
     @PreUpdate

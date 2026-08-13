@@ -1,5 +1,6 @@
 package com.edocman.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,8 @@ public class SupabaseStorageService {
     @Value("${supabase.bucket}")
     private String supabaseBucket;
 
-    @Value("${supabase.simulation:true}")
-    private boolean simulation;
+    @Autowired
+    private SystemConfigService systemConfigService;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String localUploadDir = "uploads";
@@ -40,7 +41,7 @@ public class SupabaseStorageService {
         String fileName = UUID.randomUUID().toString() + fileExtension;
         String filePath = folder + "/" + fileName;
 
-        if (simulation) {
+        if (systemConfigService.isSupabaseSimulation()) {
             // Save locally
             Path uploadPath = Paths.get(localUploadDir, folder);
             if (!Files.exists(uploadPath)) {

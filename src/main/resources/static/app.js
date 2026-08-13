@@ -44,6 +44,7 @@ function showSection(sectionId) {
 function checkSession() {
     const savedToken = localStorage.getItem('edocman_token');
     const savedUser = localStorage.getItem('edocman_user');
+    const savedRole = localStorage.getItem('edocman_role');
     
     if (savedToken && savedUser) {
         currentToken = savedToken;
@@ -53,7 +54,12 @@ function checkSession() {
         document.getElementById('clerk-auth-container').classList.add('hidden');
         document.getElementById('user-profile-container').classList.remove('hidden');
         document.getElementById('user-display-name').innerText = 'คุณ ' + currentUser.fullName;
-        document.getElementById('nav-dashboard-link').classList.remove('hidden');
+        
+        if (savedRole === 'ADMIN') {
+            document.getElementById('nav-dashboard-link').classList.add('hidden');
+        } else {
+            document.getElementById('nav-dashboard-link').classList.remove('hidden');
+        }
     } else {
         currentToken = null;
         currentUser = null;
@@ -63,49 +69,258 @@ function checkSession() {
     }
 }
 
-// Auth actions simulation (Clerk simulation wrapper)
-function simulateLogin(mockId, mockName, mockEmail) {
-    const requestBody = {
-        clerkUserId: mockId,
-        email: mockEmail,
-        fullName: mockName,
-        phone: "089-765-4321",
-        pdpaConsented: false
-    };
+// Auth modal handlers
+function openAuthModal(view) {
+    document.getElementById('auth-overlay').classList.remove('hidden');
+    
+    // Hide all panels
+    document.querySelectorAll('.auth-panel').forEach(p => p.classList.add('hidden'));
+    
+    if (view === 'signin') {
+        document.getElementById('auth-modal-title').innerText = "เข้าสู่ระบบ eDocman";
+        document.getElementById('auth-panel-signin').classList.remove('hidden');
+    } else if (view === 'signup') {
+        document.getElementById('auth-modal-title').innerText = "ลงทะเบียนสมาชิกใหม่";
+        document.getElementById('auth-panel-signup').classList.remove('hidden');
+    } else if (view === 'forgot') {
+        document.getElementById('auth-modal-title').innerText = "กู้คืนรหัสผ่าน";
+        document.getElementById('auth-panel-forgot').classList.remove('hidden');
+    } else if (view === 'mfa') {
+        document.getElementById('auth-modal-title').innerText = "ความปลอดภัยสองชั้น (2FA)";
+        document.getElementById('auth-panel-mfa').classList.remove('hidden');
+    }
+}
 
+function closeAuthModal() {
+    document.getElementById('auth-overlay').classList.add('hidden');
+}
+
+// Handle login submission
+function handleNativeLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data.mfaRequired) {
+            document.getElementById('mfa-target-email').innerText = data.email;
+            openAuthModal('mfa');
+            startOtpCooldownTimer(60);
+        } else {
+            localStorage.setItem('edocman_token', data.token);
+            localStorage.setItem('edocman_user', JSON.stringify(data.user));
+            localStorage.setItem('edocman_role', data.user.role);
+            checkSession();
+            closeAuthModal();
+            if (data.user.role === 'ADMIN') {
+                showSection('admin');
+            } else {
+                showSection('dashboard');
+            }
+        }
+    })
+    .catch(err => {
+        alert(err.message);
+    });
+}
+
+// Handle registration submission
+function handleNativeRegister(e) {
+    e.preventDefault();
+    const fullName = document.getElementById('reg-name').value;
+    const email = document.getElementById('reg-email').value;
+    const phone = document.getElementById('reg-phone').value;
+    const password = document.getElementById('reg-password').value;
+    const pdpaConsented = document.getElementById('reg-pdpa').checked;
+    
     fetch('/api/auth/register', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName, email, phone, password, pdpaConsented })
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("การสมัครสมาชิกล้มเหลว อีเมลนี้อาจถูกใช้งานแล้ว");
+        }
+        return res.json();
+    })
+    .then(user => {
+        alert("ลงทะเบียนบัญชี eDocman สำเร็จ! กรุณาเข้าสู่ระบบด้วยบัญชีของคุณ");
+        openAuthModal('signin');
+    })
+    .catch(err => {
+        alert(err.message);
+    });
+}
+
+// Handle forgot password recovery email
+function handleNativeForgot(e) {
+    e.preventDefault();
+    const email = document.getElementById('forgot-email').value;
+    
+    fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("หากมีบัญชีนี้ในระบบ เราได้จัดส่งรหัสและลิงก์รีเซ็ตไปที่อีเมลของคุณแล้ว");
+        openAuthModal('signin');
+    })
+    .catch(err => {
+        alert("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง");
+    });
+}
+
+// Auto focus movement for 2FA OTP codes boxes
+function handleOtpFocus(input, index) {
+    if (input.value.length === 1 && index < 6) {
+        document.getElementById('otp-' + (index + 1)).focus();
+    }
+}
+
+// Resend OTP
+function resendMfaCode() {
+    const email = document.getElementById('mfa-target-email').innerText;
+    fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("ส่งรหัสผ่าน 2FA OTP ใหม่เรียบร้อยแล้ว");
+        startOtpCooldownTimer(60);
+    })
+    .catch(err => alert("ล้มเหลวในการส่งรหัสอีกครั้ง"));
+}
+
+// Submit 2FA OTP Code
+function submitNativeMfa() {
+    const email = document.getElementById('mfa-target-email').innerText;
+    const otpCode = [
+        document.getElementById('otp-1').value,
+        document.getElementById('otp-2').value,
+        document.getElementById('otp-3').value,
+        document.getElementById('otp-4').value,
+        document.getElementById('otp-5').value,
+        document.getElementById('otp-6').value
+    ].join('');
+    
+    if (otpCode.length < 6) {
+        alert("กรุณากรอกรหัส OTP ให้ครบถ้วน");
+        return;
+    }
+    
+    fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp_code: otpCode })
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("รหัสยืนยันไม่ถูกต้องหรือหมดอายุการใช้งาน");
+        }
+        return res.json();
+    })
+    .then(data => {
+        localStorage.setItem('edocman_token', data.token);
+        localStorage.setItem('edocman_user', JSON.stringify(data.user));
+        localStorage.setItem('edocman_role', data.user.role);
+        checkSession();
+        closeAuthModal();
+        showSection('dashboard');
+    })
+    .catch(err => {
+        alert(err.message);
+    });
+}
+
+// Social Login Simulated triggers
+function handleSocialMockLogin(platform) {
+    const email = platform.toLowerCase() + "_" + Math.floor(Math.random() * 1000) + "@example.com";
+    const name = platform + " User";
+    const mockId = "clerk_" + platform.toLowerCase() + "_" + UUID();
+    
+    const requestBody = {
+        clerkUserId: mockId,
+        email: email,
+        fullName: name,
+        phone: "081-111-2222",
+        pdpaConsented: true
+    };
+    
+    fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody)
     })
     .then(res => res.json())
     .then(user => {
         localStorage.setItem('edocman_token', user.clerkUserId);
         localStorage.setItem('edocman_user', JSON.stringify(user));
-        
+        localStorage.setItem('edocman_role', user.role);
         checkSession();
+        closeAuthModal();
         showSection('dashboard');
     })
-    .catch(err => {
-        console.error("Login registration failed:", err);
-        alert("การเข้าสู่ระบบล้มเหลว กรุณาลองใหม่อีกครั้ง");
-    });
+    .catch(err => alert("Social Login Simulation failed"));
 }
 
-function simulateLogout() {
+function executeLogout() {
     localStorage.removeItem('edocman_token');
     localStorage.removeItem('edocman_user');
+    localStorage.removeItem('edocman_role');
     checkSession();
     showSection('landing');
 }
 
-// Dashboard Service Flow Trigger
+// Helper to make a UUID
+function UUID() {
+    return 'xxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+// 2FA cooldown timer
+let otpTimer = null;
+function startOtpCooldownTimer(duration) {
+    const btn = document.getElementById('otp-resend-btn');
+    const display = document.getElementById('otp-cooldown-timer');
+    if (otpTimer) clearInterval(otpTimer);
+    
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.6';
+    display.innerText = duration;
+    
+    otpTimer = setInterval(() => {
+        duration--;
+        display.innerText = duration;
+        if (duration <= 0) {
+            clearInterval(otpTimer);
+            btn.style.pointerEvents = 'auto';
+            btn.style.opacity = '1';
+        }
+    }, 1000);
+}
+
+// Landing flows triggers
 function startServiceRequest() {
     if (!currentToken) {
-        // Trigger simulated login
-        simulateLogin('user_mock_123', 'สมชาย รักชาติ', 'somchai@email.com');
+        openAuthModal('signin');
     } else {
         showSection('dashboard');
     }
@@ -113,7 +328,7 @@ function startServiceRequest() {
 
 function selectServiceCatalog(catalogType) {
     if (!currentToken) {
-        simulateLogin('user_mock_123', 'สมชาย รักชาติ', 'somchai@email.com');
+        openAuthModal('signin');
     } else {
         showSection('dashboard');
         if (catalogType === 'DBD') {
@@ -124,6 +339,35 @@ function selectServiceCatalog(catalogType) {
             showWizard('house-reg');
         }
     }
+}
+
+// Admin sadminwa login trigger
+function handleAdminLogin(e) {
+    e.preventDefault();
+    const user = document.getElementById('admin-username-input').value;
+    const pass = document.getElementById('admin-password-input').value;
+    
+    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user, password: pass })
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("รหัสแอดมินหรือรหัสผ่านไม่ถูกต้อง");
+        }
+        return res.json();
+    })
+    .then(data => {
+        localStorage.setItem('edocman_token', data.token);
+        localStorage.setItem('edocman_user', JSON.stringify(data.user));
+        localStorage.setItem('edocman_role', data.user.role);
+        checkSession();
+        showSection('admin');
+    })
+    .catch(err => {
+        alert(err.message);
+    });
 }
 
 // Fetch user orders list from backend
@@ -870,4 +1114,65 @@ function formatJsonString(val) {
     } catch (e) {
         return val;
     }
+}
+
+// Admin panel view handlers
+function switchAdminTab(tabName) {
+    document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.add('hidden'));
+    document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById('admin-tab-' + tabName).classList.remove('hidden');
+    event.currentTarget.classList.add('active');
+}
+
+function loadAdminUsers() {
+    fetch('/api/admin/users', {
+        headers: { 'Authorization': 'Bearer ' + currentToken }
+    })
+    .then(res => res.json())
+    .then(users => {
+        const tbody = document.getElementById('admin-users-tbody');
+        tbody.innerHTML = '';
+        users.forEach(u => {
+            const consentDate = u.pdpaConsentDate ? new Date(u.pdpaConsentDate).toLocaleString('th-TH') : '-';
+            tbody.innerHTML += `
+                <tr>
+                    <td>${u.id}</td>
+                    <td><span class="badge badge-warning">${u.clerkUserId}</span></td>
+                    <td>${u.fullName || '-'}</td>
+                    <td>${u.email}</td>
+                    <td>${u.phone || '-'}</td>
+                    <td>${u.pdpaConsented ? '<span class="text-success"><i class="fa-solid fa-circle-check"></i> ยินยอมแล้ว</span>' : '<span class="text-danger"><i class="fa-solid fa-circle-xmark"></i> ยังไม่เซ็น</span>'}</td>
+                    <td>${consentDate}</td>
+                </tr>
+            `;
+        });
+    })
+    .catch(err => console.error("Error loading users list:", err));
+}
+
+function loadAdminConfig() {
+    fetch('/api/admin/config', {
+        headers: { 'Authorization': 'Bearer ' + currentToken }
+    })
+    .then(res => res.json())
+    .then(configs => {
+        document.getElementById('sim-toggle-stripe').checked = configs.stripeSimulation;
+        document.getElementById('sim-toggle-supabase').checked = configs.supabaseSimulation;
+        document.getElementById('sim-toggle-resend').checked = configs.resendSimulation;
+        document.getElementById('sim-toggle-flowaccount').checked = configs.flowAccountSimulation;
+    })
+    .catch(err => console.error("Error loading settings configurations:", err));
+}
+
+function toggleSimSetting(key, enabled) {
+    fetch(`/api/admin/config/toggle?key=${key}&value=${enabled}`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + currentToken }
+    })
+    .then(res => res.json())
+    .then(configs => {
+        console.log("Config updated:", configs);
+    })
+    .catch(err => alert("ล้มเหลวในการบันทึกค่าการจำลองการทำงาน"));
 }

@@ -3,6 +3,7 @@ package com.edocman.service;
 import com.stripe.Stripe;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
@@ -19,13 +20,13 @@ public class StripePaymentService {
     @Value("${stripe.webhook.secret}")
     private String webhookSecret;
 
-    @Value("${stripe.simulation:true}")
-    private boolean simulation;
+    @Autowired
+    private SystemConfigService systemConfigService;
 
     public Map<String, Object> createPaymentIntent(BigDecimal amount, String currency, String orderId) throws Exception {
         Map<String, Object> responseData = new HashMap<>();
 
-        if (simulation) {
+        if (systemConfigService.isStripeSimulation()) {
             String mockIntentId = "pi_mock_" + UUID.randomUUID().toString().substring(0, 8);
             String mockClientSecret = "pi_mock_secret_" + orderId + "_" + UUID.randomUUID().toString().substring(0, 8);
             
@@ -69,6 +70,6 @@ public class StripePaymentService {
     }
 
     public boolean isSimulation() {
-        return simulation;
+        return systemConfigService.isStripeSimulation();
     }
 }

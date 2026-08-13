@@ -26,7 +26,7 @@ public class ClerkAuthFilter implements Filter {
         
         // Pass through non-API requests, static resources, and public API endpoints
         if (!path.startsWith("/api/") || 
-            path.startsWith("/api/auth/register") || 
+            (path.startsWith("/api/auth/") && !path.startsWith("/api/auth/me")) || 
             path.startsWith("/api/payments/webhook") ||
             path.contains("/document/print") ||
             path.contains("/document/official")) {

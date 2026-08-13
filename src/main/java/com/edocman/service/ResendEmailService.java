@@ -1,5 +1,6 @@
 package com.edocman.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -16,13 +17,13 @@ public class ResendEmailService {
     @Value("${resend.sender}")
     private String resendSender;
 
-    @Value("${resend.simulation:true}")
-    private boolean simulation;
+    @Autowired
+    private SystemConfigService systemConfigService;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     public boolean sendEmail(String to, String subject, String htmlContent) {
-        if (simulation) {
+        if (systemConfigService.isResendSimulation()) {
             System.out.println("====== [RESEND EMAIL SIMULATION] ======");
             System.out.println("From: " + resendSender);
             System.out.println("To: " + to);

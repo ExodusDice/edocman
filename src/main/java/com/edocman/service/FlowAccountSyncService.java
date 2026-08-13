@@ -23,8 +23,8 @@ public class FlowAccountSyncService {
     @Value("${flowaccount.client.secret}")
     private String clientSecret;
 
-    @Value("${flowaccount.simulation:true}")
-    private boolean simulation;
+    @Autowired
+    private SystemConfigService systemConfigService;
 
     @Autowired
     private FlowAccountSyncLogRepository logRepository;
@@ -56,7 +56,7 @@ public class FlowAccountSyncService {
             // Convert map to simple description string for logging
             requestPayload = invoiceData.toString();
 
-            if (simulation) {
+            if (systemConfigService.isFlowAccountSimulation()) {
                 documentId = "INV-FA-MOCK-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
                 responsePayload = "{\n" +
                         "  \"status\": \"success\",\n" +
