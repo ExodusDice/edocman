@@ -93,6 +93,15 @@ public class DocumentGeneratorService {
             case PDPA_BADGE_SETUP:
                 generatePdpaBadgeHtml(html, order, data, customerName);
                 break;
+            case COMPANY_NAME_CHANGE:
+                generateCompanyNameChangeHtml(html, order, data, customerName);
+                break;
+            case MEMORANDUM_AMENDMENT:
+                generateMemorandumAmendmentHtml(html, order, data, customerName);
+                break;
+            case FINANCIAL_STATEMENT_PREP:
+                generateFinancialStatementPrepHtml(html, order, data, customerName);
+                break;
         }
 
         // Shared Footer Signatures
@@ -313,6 +322,91 @@ public class DocumentGeneratorService {
         html.append("    <h3 style=\"color:#047857; margin-top:0;\"><i class=\"fa-solid fa-circle-check\"></i> ใบรับรองการติดตั้งระบบ PDPA สำเร็จ</h3>\n");
         html.append("    <p style=\"font-size:14px; margin:5px 0;\">เว็บไซต์นี้ได้ดำเนินการลงทะเบียนติดตั้งตราสัญลักษณ์คุ้มครองข้อมูลส่วนบุคคล (PDPA Compliant Badge) เรียบร้อยแล้ว</p>\n");
         html.append("    <p style=\"font-size:13px; font-weight:bold;\">eDocman Certification ID: ED-PDPA-" + String.format("%06d", order.getId()) + "</p>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateCompanyNameChangeHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">คำขอจดทะเบียนแก้ไขเพิ่มเติมชื่อนิติบุคคล (กรมพัฒนาธุรกิจการค้า)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลเดิมและคำร้องขอ / Existing Entity Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อเดิมภาษาไทย / Old Name (TH):</span> <span class=\"value\">" + data.getOrDefault("oldCompanyNameThai", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขทะเบียนนิติบุคคล / Registration ID:</span> <span class=\"value\">" + data.getOrDefault("companyId", "xxxxxxxxxxxxx") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลชื่อใหม่ที่เสนอเปลี่ยน / New Entity Names</div>\n");
+        html.append("    <p><strong>ชื่อใหม่ภาษาไทย / New Name (Thai):</strong> <span class=\"value\" style=\"min-width:350px;\">" + data.getOrDefault("newCompanyNameThai", "-") + "</span></p>\n");
+        html.append("    <p><strong>ชื่อใหม่ภาษาอังกฤษ / New Name (English):</strong> <span class=\"value\" style=\"min-width:350px;\">" + data.getOrDefault("newCompanyNameEng", "-") + "</span></p>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">มติคณะกรรมการ / Board Resolution Info</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">วันที่ประชุมผู้ถือหุ้น / Shareholder Meeting Date:</span> <span class=\"value\">" + data.getOrDefault("resolutionDate", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">พยานบุคคลร่วมลงนาม / Witness Name:</span> <span class=\"value\">" + data.getOrDefault("witnessName", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateMemorandumAmendmentHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">คำขอแก้ไขเพิ่มเติมหนังสือบริคณห์สนธิ (กรมพัฒนาธุรกิจการค้า)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">รายละเอียดนิติบุคคล / Corporate Info</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อบริษัท / Company Name:</span> <span class=\"value\">" + data.getOrDefault("companyName", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขทะเบียนนิติบุคคล / Registration ID:</span> <span class=\"value\">" + data.getOrDefault("companyId", "xxxxxxxxxxxxx") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อความที่แก้ไขเพิ่มเติม / MOA Amendment Details</div>\n");
+        html.append("    <p><strong>ข้อที่ขอแก้ไข (เช่น วัตถุประสงค์ หรือ ทุนเรือนหุ้น):</strong> <span class=\"value\" style=\"min-width:350px;\">" + data.getOrDefault("amendedArticles", "แก้ไขวัตถุประสงค์ของบริษัท") + "</span></p>\n");
+        html.append("    <div class=\"row\" style=\"margin-top:10px;\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">รายละเอียดวัตถุประสงค์ที่เพิ่มเติม / Detailed objective or capital details:</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <p><span class=\"value\" style=\"width:100%; min-height:80px; display:block;\">" + data.getOrDefault("amendmentTextDetails", "-") + "</span></p>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">มติคณะกรรมการ / Board Resolution Info</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">วันที่ประชุมคณะกรรมการ / Resolution Date:</span> <span class=\"value\">" + data.getOrDefault("resolutionDate", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateFinancialStatementPrepHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">ใบนำส่งงบการเงินและรายละเอียดผู้ทำบัญชี (กรมพัฒนาธุรกิจการค้า)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลกิจการและผู้มีอำนาจ / Corporate Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อบริษัท / Company Name:</span> <span class=\"value\">" + data.getOrDefault("companyName", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขทะเบียนนิติบุคคล / Registration ID:</span> <span class=\"value\">" + data.getOrDefault("companyId", "xxxxxxxxxxxxx") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">รอบบัญชีและข้อมูลทางการเงิน / Financial Statements Summary</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">รอบปีงบการเงิน / Accounting Year Period:</span> <span class=\"value\">" + data.getOrDefault("accountingPeriod", "2568") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">จำนวนพนักงาน / Number of Employees:</span> <span class=\"value\">" + data.getOrDefault("employeeCount", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">รายได้รวม (บาท) / Total Revenue:</span> <span class=\"value\">" + data.getOrDefault("totalRevenue", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">สินทรัพย์รวม (บาท) / Total Assets:</span> <span class=\"value\">" + data.getOrDefault("totalAssets", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ผู้ทำบัญชีและผู้ตรวจสอบ / CPA Auditor Assignment</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ผู้ส่งงบ (CPA/TA) / CPA Assigned:</span> <span class=\"value\">" + data.getOrDefault("cpaName", "บริษัทจัดหาตรวจสอบบัญชี eDocman (CPA หุ้นส่วน)") + "</span></div>\n");
+        html.append("    </div>\n");
         html.append("  </div>\n");
     }
 }

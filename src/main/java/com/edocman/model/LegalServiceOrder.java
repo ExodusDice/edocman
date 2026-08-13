@@ -74,7 +74,10 @@ public class LegalServiceOrder {
         DBD_E_FILING,
         CAR_PRB_INSURANCE,
         HOUSE_REGISTRATION_UPDATE,
-        PDPA_BADGE_SETUP
+        PDPA_BADGE_SETUP,
+        COMPANY_NAME_CHANGE,
+        MEMORANDUM_AMENDMENT,
+        FINANCIAL_STATEMENT_PREP
     }
 
     public enum OrderStatus {

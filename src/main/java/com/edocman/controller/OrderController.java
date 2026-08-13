@@ -162,6 +162,12 @@ public class OrderController {
                 return new BigDecimal("990.00");
             case PDPA_BADGE_SETUP:
                 return new BigDecimal("890.00");
+            case COMPANY_NAME_CHANGE:
+                return new BigDecimal("1900.00");
+            case MEMORANDUM_AMENDMENT:
+                return new BigDecimal("2900.00");
+            case FINANCIAL_STATEMENT_PREP:
+                return new BigDecimal("4500.00");
             default:
                 return new BigDecimal("1000.00");
         }

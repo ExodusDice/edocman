@@ -349,6 +349,12 @@ function selectServiceCatalog(catalogType) {
             showWizard('house-reg');
         } else if (catalogType === 'PDPA') {
             showWizard('pdpa-badge');
+        } else if (catalogType === 'NAME_CHANGE') {
+            showWizard('company-name-change');
+        } else if (catalogType === 'MEMO') {
+            showWizard('memorandum-amendment');
+        } else if (catalogType === 'FINANCIAL_PREP') {
+            showWizard('financial-statement-prep');
         }
     }
 }
@@ -710,6 +716,103 @@ function showWizard(serviceType) {
                     <option value="Floating Badge (ตราสัญลักษณ์ลอยตัว)">Floating Badge (ตราสัญลักษณ์ลอยตัว)</option>
                     <option value="Footer Banner (แบนเนอร์ท้ายเว็บไซต์)">Footer Banner (แบนเนอร์ท้ายเว็บไซต์)</option>
                 </select>
+            </div>
+            </div>
+        `;
+    } else if (serviceType === 'company-name-change') {
+        titleEl.innerHTML = '<i class="fa-solid fa-signature text-primary"></i> บริการจดทะเบียนเปลี่ยนชื่อบริษัทจำกัด';
+        fieldsHtml = `
+            <div class="form-group">
+                <label>เลขทะเบียนนิติบุคคล 13 หลัก / Registration Company ID</label>
+                <input type="text" class="form-control" name="companyId" required placeholder="01055xxxxxxxx" maxlength="13">
+            </div>
+            <div class="form-group">
+                <label>ชื่อบริษัทเดิม (ภาษาไทย) / Old Company Name (Thai)</label>
+                <input type="text" class="form-control" name="oldCompanyNameThai" required placeholder="บริษัท เดิมจำกัด">
+            </div>
+            <div class="form-group">
+                <label>ชื่อบริษัทใหม่ภาษาไทย (ที่ได้รับการอนุมัติจองชื่อแล้ว)</label>
+                <input type="text" class="form-control" name="newCompanyNameThai" required placeholder="บริษัท ใหม่จำกัด">
+            </div>
+            <div class="form-group">
+                <label>ชื่อบริษัทใหม่ภาษาอังกฤษ / New Company Name (English)</label>
+                <input type="text" class="form-control" name="newCompanyNameEng" required placeholder="New Name Co., Ltd.">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>วันที่จัดประชุมผู้ถือหุ้นที่มีมติเปลี่ยนชื่อ / Shareholder Meeting Date</label>
+                    <input type="date" class="form-control" name="resolutionDate" required>
+                </div>
+                <div class="form-group">
+                    <label>ชื่อกรรมการผู้มีอำนาจลงนามแทนบริษัท / Director Name</label>
+                    <input type="text" class="form-control" name="directorName" required placeholder="นายสมศักดิ์ รักดี">
+                </div>
+            </div>
+        `;
+    } else if (serviceType === 'memorandum-amendment') {
+        titleEl.innerHTML = '<i class="fa-solid fa-file-signature text-primary"></i> บริการจดทะเบียนแก้ไขหนังสือบริคณห์สนธิ (ม.อ.ส.)';
+        fieldsHtml = `
+            <div class="form-group">
+                <label>ชื่อบริษัทที่ต้องการแก้ไขข้อมูล / Company Name</label>
+                <input type="text" class="form-control" name="companyName" required placeholder="บริษัท พัฒนาจำกัด">
+            </div>
+            <div class="form-group">
+                <label>เลขทะเบียนนิติบุคคล 13 หลัก / Registration Company ID</label>
+                <input type="text" class="form-control" name="companyId" required placeholder="01055xxxxxxxx" maxlength="13">
+            </div>
+            <div class="form-group">
+                <label>หัวข้อหนังสือบริคณห์สนธิที่ต้องการแก้ไข / Clause to Amend</label>
+                <select class="form-control" name="amendedArticles">
+                    <option value="แก้ไขเพิ่มเติมวัตถุประสงค์ของบริษัท (วัตถุที่ประสงค์)">แก้ไขเพิ่มเติมวัตถุประสงค์ของบริษัท (วัตถุที่ประสงค์)</option>
+                    <option value="แก้ไขเพิ่มเติมทุนจดทะเบียนและแบ่งแยกหุ้น (ทุนเรือนหุ้น)">แก้ไขเพิ่มเติมทุนจดทะเบียนและแบ่งแยกหุ้น (ทุนเรือนหุ้น)</option>
+                    <option value="แก้ไขข้อจำกัดอำนาจกรรมการ (อำนาจกรรมการ)">แก้ไขข้อจำกัดอำนาจกรรมการ (อำนาจกรรมการ)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>รายละเอียดข้อความที่ขอแก้ไขเพิ่มเติม / Details of Amendment</label>
+                <textarea class="form-control" name="amendmentTextDetails" required rows="4" placeholder="ข้อ 3. เพิ่มเติมวัตถุประสงค์ข้อ (41) ประกอบธุรกิจนำเข้าและส่งออกสินค้าอิเล็กทรอนิกส์..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>วันที่ประชุมที่มีมติพิเศษเพื่อแก้ไข / Meeting Date</label>
+                    <input type="date" class="form-control" name="resolutionDate" required>
+                </div>
+            </div>
+        `;
+    } else if (serviceType === 'financial-statement-prep') {
+        titleEl.innerHTML = '<i class="fa-solid fa-file-invoice-dollar text-primary"></i> บริการจัดทำงบการเงินและบัญชีครบรอบปี';
+        fieldsHtml = `
+            <div class="form-group">
+                <label>ชื่อบริษัทผู้ยื่นคำร้องจัดทำงบ / Company Name</label>
+                <input type="text" class="form-control" name="companyName" required placeholder="บริษัท แอดวานซ์ดิจิทัล จำกัด">
+            </div>
+            <div class="form-group">
+                <label>เลขทะเบียนนิติบุคคล 13 หลัก / Registration Company ID</label>
+                <input type="text" class="form-control" name="companyId" required placeholder="01055xxxxxxxx" maxlength="13">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>รอบระยะเวลาบัญชีปีงบประมาณ (พ.ศ.) / Accounting Period</label>
+                    <input type="text" class="form-control" name="accountingPeriod" required placeholder="31 ธันวาคม 2568" value="2568">
+                </div>
+                <div class="form-group">
+                    <label>จำนวนพนักงานเฉลี่ยในงวดปี / Employee Count</label>
+                    <input type="number" class="form-control" name="employeeCount" required placeholder="10" min="0">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>ประมาณการรายได้รวมปีนี้ (บาท) / Estimate Revenue</label>
+                    <input type="text" class="form-control" name="totalRevenue" required placeholder="5,000,000.00">
+                </div>
+                <div class="form-group">
+                    <label>ประมาณการสินทรัพย์รวมปีนี้ (บาท) / Estimate Assets</label>
+                    <input type="text" class="form-control" name="totalAssets" required placeholder="2,500,000.00">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>แนบรายละเอียดรายได้/รายจ่ายเบื้องต้น (เช่น Excel หรือใบสำคัญ)</label>
+                <p style="font-size: 11px; color: #d97706;">* กรุณาแนบไฟล์สลิปหรือหลักฐานบัญชีเบื้องต้นในขั้นตอนอัปโหลดเอกสารด้านล่าง (ถ้ามี)</p>
             </div>
         `;
     }
@@ -1129,6 +1232,9 @@ function mapWizardToServiceEnum(wizardId) {
         case 'car-prb': return 'CAR_PRB_INSURANCE';
         case 'house-reg': return 'HOUSE_REGISTRATION_UPDATE';
         case 'pdpa-badge': return 'PDPA_BADGE_SETUP';
+        case 'company-name-change': return 'COMPANY_NAME_CHANGE';
+        case 'memorandum-amendment': return 'MEMORANDUM_AMENDMENT';
+        case 'financial-statement-prep': return 'FINANCIAL_STATEMENT_PREP';
         default: return 'COMPANY_NAME_RESERVATION';
     }
 }
@@ -1142,6 +1248,9 @@ function translateServiceType(enumVal) {
         case 'CAR_PRB_INSURANCE': return 'ประกันภัยรถยนต์ พ.ร.บ. ภาคบังคับ';
         case 'HOUSE_REGISTRATION_UPDATE': return 'แก้ไขปรับปรุงข้อมูลทะเบียนบ้าน';
         case 'PDPA_BADGE_SETUP': return 'จัดทำตราสัญลักษณ์ PDPA Compliant';
+        case 'COMPANY_NAME_CHANGE': return 'จดทะเบียนเปลี่ยนชื่อบริษัท';
+        case 'MEMORANDUM_AMENDMENT': return 'แก้ไขหนังสือบริคณห์สนธิ (ม.อ.ส.)';
+        case 'FINANCIAL_STATEMENT_PREP': return 'จัดทำงบการเงินและตรวจสอบบัญชี';
         default: return enumVal;
     }
 }
