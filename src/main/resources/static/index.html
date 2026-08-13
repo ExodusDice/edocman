@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eDocman - Paperless Thai Government Legal Documents</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="/app.css">
+    
+    <!-- Sentry SDK Browser Embed -->
+    <script src="https://browser.sentry-cdn.com/7.8.0/bundle.min.js" crossorigin="anonymous"></script>
+    <script>
+        try {
+            Sentry.init({
+                dsn: "https://examplePublicKey@o0.ingest.sentry.io/0",
+                tracesSampleRate: 1.0,
+            });
+        } catch(e) {
+            console.warn("Sentry failed to initialize: ", e);
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo" onclick="showSection('landing')">
+                <i class="fa-solid fa-file-shield logo-icon"></i>
+                <span>eDocman</span>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="#services" onclick="showSection('landing')">บริการของเรา</a>
+                <a href="#how-it-works" onclick="showSection('landing')">ขั้นตอนใช้งาน</a>
+                <a href="#" id="nav-dashboard-link" class="hidden" onclick="showSection('dashboard')">แดชบอร์ด</a>
+                <a href="#" id="nav-admin-link" onclick="showSection('admin')">รัฐบาล (จำลอง)</a>
+            </nav>
+
+            <div class="auth-buttons">
+                <!-- Clerk auth triggers will be hooked here -->
+                <div id="clerk-auth-container">
+                    <button class="btn btn-outline" onclick="simulateLogin('user_mock_123', 'สมชาย รักชาติ', 'somchai@email.com')">
+                        <i class="fa-solid fa-sign-in"></i> เข้าสู่ระบบ (จำลอง)
+                    </button>
+                </div>
+                <div id="user-profile-container" class="hidden">
+                    <span id="user-display-name">คุณสมชาย</span>
+                    <button class="btn btn-sm btn-danger" onclick="simulateLogout()">ออกจากระบบ</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION 1: Paperless Landing Page -->
+    <section id="landing-section" class="app-section">
+        <!-- Hero Banner -->
+        <div class="hero">
+            <div class="container hero-container">
+                <div class="hero-text">
+                    <div class="badge-paperless">
+                        <i class="fa-solid fa-leaf"></i> ทางเลือกไร้กระดาษ 100%
+                    </div>
+                    <h1>หมดกังวลเรื่องเอกสารราชการไทย</h1>
+                    <p class="subtitle">ระบบจัดการเอกสารกฎหมายและการจดทะเบียนภาครัฐ (DBD, พ.ร.บ., ทะเบียนบ้าน) แบบดิจิทัลเต็มรูปแบบ ไม่ต้องปรินท์ ไม่ต้องรอคิว เชื่อมโยงบัญชีและรับชำระเงินในที่เดียว</p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary btn-lg" onclick="startServiceRequest()">
+                            เริ่มใช้บริการดิจิทัล <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <a href="#services" class="btn btn-outline btn-lg">ดูบริการทั้งหมด</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="card card-premium paperless-preview">
+                        <div class="preview-header">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                            <span class="preview-title">eDocman e-Filing Vault</span>
+                        </div>
+                        <div class="preview-body">
+                            <div class="vault-row">
+                                <i class="fa-solid fa-circle-check text-success"></i>
+                                <div>
+                                    <strong>จองชื่อบริษัท (DBD)</strong>
+                                    <span>ยื่นส่งระบบจองชื่อสำเร็จ • ได้อนุมัติ</span>
+                                </div>
+                            </div>
+                            <div class="vault-row">
+                                <i class="fa-solid fa-circle-check text-success"></i>
+                                <div>
+                                    <strong>ซื้อประกันภัย พ.ร.บ. รถยนต์</strong>
+                                    <span>ชำระผ่าน PromptPay QR • ออกกรมธรรม์ทันที</span>
+                                </div>
+                            </div>
+                            <div class="vault-row">
+                                <i class="fa-solid fa-sync text-primary fa-spin"></i>
+                                <div>
+                                    <strong>ลงบัญชีบริษัท (FlowAccount API)</strong>
+                                    <span>สร้างใบรับเงินและเชื่อมข้อมูลอัตโนมัติ</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features / Services Grid -->
+        <div id="services" class="services-grid container">
+            <div class="section-header">
+                <h2>บริการดิจิทัลภาครัฐและเอกสารกฎหมาย</h2>
+                <p>เลือกบริการที่คุณต้องการทำรายการในรูปแบบออนไลน์ ไร้กระดาษ</p>
+            </div>
+            <div class="grid-3">
+                <!-- DBD Services -->
+                <div class="card service-card">
+                    <div class="service-icon"><i class="fa-solid fa-building-flag"></i></div>
+                    <h3>บริการ DBD (กรมพัฒนาธุรกิจการค้า)</h3>
+                    <p>จองชื่อนิติบุคคล, คำขอจดทะเบียนจัดตั้งบริษัทจำกัด, บริการจดทะเบียนเลิกบริษัท และยื่นงบการเงิน e-Filing สะดวก รวดเร็ว</p>
+                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('DBD')">เปิดรายการ DBD</button>
+                </div>
+                <!-- Car Insurance -->
+                <div class="card service-card">
+                    <div class="service-icon"><i class="fa-solid fa-car-burst"></i></div>
+                    <h3>ประกันภัยรถยนต์ พ.ร.บ. ภาคบังคับ</h3>
+                    <p>ซื้อ พ.ร.บ. ออนไลน์ คุ้มครองทันที รับเอกสารและกรมธรรม์ดิจิทัลพร้อมพิมพ์ หรือใช้ยื่นภาษีรถยนต์ประจำปีได้เลย</p>
+                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('CAR')">ทำรายการ พ.ร.บ.</button>
+                </div>
+                <!-- House Registration -->
+                <div class="card service-card">
+                    <div class="service-icon"><i class="fa-solid fa-house-chimney-window"></i></div>
+                    <h3>คำร้องทะเบียนบ้าน (ที่อยู่/ปรับปรุง)</h3>
+                    <p>แก้ไขข้อมูลทะเบียนบ้าน ยื่นย้ายเข้า-ย้ายออก แจ้งข้อมูลคนในบ้านผ่านระบบออนไลน์ พร้อมแนบโฉนดและบัตรในรูปแบบดิจิทัล</p>
+                    <button class="btn btn-outline btn-sm btn-block" onclick="selectServiceCatalog('HOUSE')">แจ้งแก้ไขทะเบียนบ้าน</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- How it Works section -->
+        <div id="how-it-works" class="how-it-works bg-dark">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2>สะดวกรวดเร็วใน 4 ขั้นตอน</h2>
+                    <p>ประหยัดเวลาการทำธุรกรรมกฎหมายไทย ไม่ต้องเดินทางไปหน่วยงานราชการ</p>
+                </div>
+                <div class="steps-container">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <h4>กรอกข้อมูลฟอร์ม</h4>
+                        <p>กรอกข้อมูลที่จำเป็นลงในฟอร์มจำลองเอกสารกฎหมายไทยบนหน้าเว็บ</p>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <h4>แนบเอกสารและจ่ายเงิน</h4>
+                        <p>อัปโหลดรูปบัตร/โฉนดขึ้น Supabase และชำระค่าบริการผ่าน Stripe (PromptPay QR)</p>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <h4>บันทึกบัญชีอัตโนมัติ</h4>
+                        <p>ระบบเชื่อม FlowAccount API สร้างอินวอยซ์และใบรับเงินส่งตรงไปให้คุณทันที</p>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <h4>รับเอกสารดิจิทัล</h4>
+                        <p>ดาวน์โหลดแบบฟอร์ม pre-filled พร้อมพิมพ์ หรือรับเอกสารอนุมัติฉบับจริงจากรัฐ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: Customer Dashboard -->
+    <section id="dashboard-section" class="app-section hidden">
+        <div class="container dashboard-grid">
+            <!-- Sidebar Catalog -->
+            <div class="dashboard-sidebar">
+                <div class="card">
+                    <h3>เมนูบริการ e-Services</h3>
+                    <ul class="sidebar-menu">
+                        <li><a href="#" onclick="showWizard('name-reservation')"><i class="fa-solid fa-signature"></i> จองชื่อบริษัท (DBD)</a></li>
+                        <li><a href="#" onclick="showWizard('company-opening')"><i class="fa-solid fa-file-circle-plus"></i> จัดตั้งบริษัทจำกัด (บอจ.1)</a></li>
+                        <li><a href="#" onclick="showWizard('company-closing')"><i class="fa-solid fa-file-circle-minus"></i> เลิกและชำระบัญชีบริษัท</a></li>
+                        <li><a href="#" onclick="showWizard('efiling')"><i class="fa-solid fa-file-invoice-dollar"></i> นำส่งงบ e-Filing</a></li>
+                        <li><a href="#" onclick="showWizard('car-prb')"><i class="fa-solid fa-shield-halved"></i> ประกันภัย พ.ร.บ. รถยนต์</a></li>
+                        <li><a href="#" onclick="showWizard('house-reg')"><i class="fa-solid fa-id-card-clip"></i> แก้ไขข้อมูลทะเบียนบ้าน</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Active Requests / Status -->
+                <div class="card dashboard-main-card">
+                    <div class="card-header-flex">
+                        <h2>รายการทำธุรกรรมของคุณ</h2>
+                        <button class="btn btn-primary btn-sm" onclick="showWizard('name-reservation')">
+                            <i class="fa-solid fa-plus"></i> สร้างคำร้องใหม่
+                        </button>
+                    </div>
+                    <div id="orders-list-container">
+                        <p class="text-muted">ไม่พบข้อมูลคำร้องของคุณ กรุณาเลือกเมนูบริการเพื่อเริ่มธุรกรรมแรก</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: Service Request Wizard Form -->
+    <section id="wizard-section" class="app-section hidden">
+        <div class="container max-width-700">
+            <div class="card">
+                <div class="card-header-flex">
+                    <h2 id="wizard-title">แบบฟอร์มคำขอ</h2>
+                    <button class="btn btn-outline btn-sm" onclick="showSection('dashboard')">ย้อนกลับ</button>
+                </div>
+                
+                <form id="service-wizard-form" onsubmit="handleWizardSubmit(event)">
+                    <!-- Hidden input to track service type -->
+                    <input type="hidden" id="wizard-service-type">
+
+                    <!-- Form Content Slots (Swapped dynamically based on selected wizard) -->
+                    <div id="wizard-form-fields"></div>
+
+                    <!-- Common Attachment Upload Slot -->
+                    <div class="form-group" style="margin-top:20px; padding-top:20px; border-top:1px solid #eee;">
+                        <label for="wizard-file-upload"><strong>แนบรูปภาพเอกสารหลักฐาน (ID Card, โฉนด หรือเอกสารทางบัญชี)</strong></label>
+                        <p class="form-help-text">เอกสารจะถูกส่งไปเก็บรักษาอย่างปลอดภัยที่ Supabase Vault</p>
+                        <input type="file" id="wizard-file-upload" class="form-control" accept="image/*,application/pdf">
+                        <div id="file-upload-status" style="margin-top:5px; font-size:13px; font-weight:500;"></div>
+                    </div>
+
+                    <!-- Submit Actions -->
+                    <div class="form-actions" style="margin-top:30px;">
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">
+                            <i class="fa-solid fa-paper-plane"></i> ยืนยันข้อมูลคำขอและชำระค่าบริการ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: Stripe Checkout Overlay -->
+    <div id="payment-overlay" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-brands fa-stripe text-primary" style="font-size:32px; vertical-align:middle;"></i> Stripe Payment Secure</h3>
+                <button class="btn-close" onclick="closePaymentOverlay()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-order-summary">
+                    <div class="row-flex">
+                        <span>บริการ / Service:</span>
+                        <strong id="pay-service-name">-</strong>
+                    </div>
+                    <div class="row-flex" style="font-size: 18px; margin-top:5px; padding-top:5px; border-top:1px solid #eee;">
+                        <span>ค่าบริการสุทธิ / Total Due:</span>
+                        <strong class="text-primary"><span id="pay-service-price">0.00</span> บาท</strong>
+                    </div>
+                </div>
+
+                <div class="payment-tabs">
+                    <button class="pay-tab-btn active" onclick="switchPayMethod('card')"><i class="fa-solid fa-credit-card"></i> บัตรเครดิต</button>
+                    <button class="pay-tab-btn" onclick="switchPayMethod('promptpay')"><i class="fa-solid fa-qrcode"></i> PromptPay QR</button>
+                    <button class="pay-tab-btn" onclick="switchPayMethod('truemoney')"><i class="fa-solid fa-wallet"></i> TrueMoney</button>
+                </div>
+
+                <!-- Card Form -->
+                <div id="pay-method-card" class="pay-method-container">
+                    <div class="form-group">
+                        <label>หมายเลขบัตรเครดิต / Card Number</label>
+                        <input type="text" class="form-control" placeholder="4242 4242 4242 4242" value="4242 4242 4242 4242">
+                    </div>
+                    <div class="row-flex gap-10">
+                        <div class="form-group" style="flex:1;">
+                            <label>วันหมดอายุ / Expiry Date</label>
+                            <input type="text" class="form-control" placeholder="MM/YY" value="12/28">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>CVC</label>
+                            <input type="password" class="form-control" placeholder="123" value="123">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PromptPay QR Code -->
+                <div id="pay-method-promptpay" class="pay-method-container hidden">
+                    <div class="promptpay-qr-container">
+                        <div class="promptpay-header">
+                            <span class="pp-logo">Prompt Pay</span>
+                            <span class="pp-th">ไทยคิวอาร์เพย์เมนต์</span>
+                        </div>
+                        <div id="promptpay-qr-placeholder">
+                            <!-- QR code will be generated via app.js -->
+                        </div>
+                        <div class="promptpay-footer">
+                            <p style="font-size:12px; margin: 5px 0;">สแกนเพื่อจ่ายเงินด้วยแอพพลิเคชั่นธนาคารของคุณ</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TrueMoney Form -->
+                <div id="pay-method-truemoney" class="pay-method-container hidden">
+                    <div class="form-group">
+                        <label>หมายเลขโทรศัพท์ทรูมันนี่ / TrueMoney Phone Number</label>
+                        <input type="text" id="truemoney-phone" class="form-control" placeholder="08x-xxx-xxxx" value="081-234-5678">
+                    </div>
+                </div>
+
+                <input type="hidden" id="payment-target-order-id">
+                <button class="btn btn-primary btn-block btn-lg" style="margin-top:20px;" onclick="executePayment()">
+                    <i class="fa-solid fa-lock"></i> ชำระเงินสุทธิอย่างปลอดภัย (Stripe Mock)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 5: Mock Government Officer Portal / Admin Panel -->
+    <section id="admin-section" class="app-section hidden">
+        <div class="container">
+            <div class="card card-premium">
+                <div class="card-header-flex">
+                    <h2><i class="fa-solid fa-gavel text-primary"></i> แดชบอร์ดตรวจสอบสำหรับภาครัฐ (จำลอง)</h2>
+                    <span class="badge badge-warning">ระบบทดสอบ (Sandboxed Environment)</span>
+                </div>
+                <p>พอร์ทัลส่วนงานราชการเพื่อกด "อนุมัติ / ออกเอกสารจริง" เพื่อจำลองลูปธุรกรรมและดูการทำงานของ FlowAccount API + Resend Email</p>
+                
+                <div class="admin-orders-table-wrapper">
+                    <table class="table" id="admin-orders-table">
+                        <thead>
+                            <tr>
+                                <th>OrderID</th>
+                                <th>ชื่อลูกค้า</th>
+                                <th>ประเภทบริการ</th>
+                                <th>สถานะยอดเงิน</th>
+                                <th>การเชื่อม FlowAccount</th>
+                                <th>สถานะคำขอภาครัฐ</th>
+                                <th>การดำเนินงาน (Actions)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-orders-tbody">
+                            <!-- Populated dynamically via app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- FlowAccount Sync details panel -->
+            <div class="card" style="margin-top:20px;" id="flowaccount-audit-card">
+                <h3><i class="fa-solid fa-receipt text-success"></i> บันทึกการเชื่อมต่อบัญชี FlowAccount API Audit Log</h3>
+                <p class="text-muted">คลิกเลือกคำร้องในตารางเพื่อดูการแลกเปลี่ยน JSON Payload ระหว่าง Java Backend กับ FlowAccount API</p>
+                <div id="flowaccount-log-details" class="hidden">
+                    <div class="row-flex font-mono bg-dark-code">
+                        <div style="flex:1; padding:10px;">
+                            <strong>JSON Request Sent to FlowAccount</strong>
+                            <pre id="fa-log-request"></pre>
+                        </div>
+                        <div style="flex:1; padding:10px; border-left: 1px solid #334155;">
+                            <strong>JSON Response Received</strong>
+                            <pre id="fa-log-response"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FLOATING COMPLIANCE COMPONENTS -->
+    <!-- Termly compliance mock links in footer -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <p>&copy; 2026 eDocman. All Rights Reserved. Paperless Thai Government Solutions.</p>
+            <div class="footer-links">
+                <a href="#" onclick="showTermlyPolicy('privacy')">Privacy Policy</a>
+                <a href="#" onclick="showTermlyPolicy('terms')">Terms of Service</a>
+                <a href="#" onclick="showTermlyPolicy('cookie')">Cookie Policy</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- PDPA Compliance Badge -->
+    <div class="pdpa-floating-badge" onclick="togglePdpaModal()">
+        <i class="fa-solid fa-user-shield badge-icon"></i>
+        <span>PDPA Compliant</span>
+    </div>
+
+    <!-- PDPA Consent Modal -->
+    <div id="pdpa-modal" class="modal-overlay hidden">
+        <div class="modal-card max-width-600">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-shield-halved text-success"></i> ข้อตกลงความยินยอมข้อมูลส่วนบุคคล (PDPA Consent)</h3>
+                <button class="btn-close" onclick="togglePdpaModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) ระบบ <strong>eDocman</strong> จำเป็นต้องขอความยินยอมในการจัดเก็บและส่งต่อข้อมูลส่วนบุคคลของคุณ เพื่อยื่นขอจดทะเบียนกับหน่วยงานภาครัฐ ดังนี้:</p>
+                <ul class="pdpa-list">
+                    <li><i class="fa-solid fa-check text-success"></i> <strong>ข้อมูลระบุตัวตน:</strong> สำเนาบัตรประชาชน, เลขประจำตัวผู้เสียภาษี เพื่อใช้กรอกแบบฟอร์ม DBD และประกันภัย พ.ร.บ.</li>
+                    <li><i class="fa-solid fa-check text-success"></i> <strong>ข้อมูลทรัพย์สิน:</strong> รหัสทะเบียนบ้าน, ทะเบียนรถยนต์ เพื่อทำรายการยื่นภาษีและจดทะเบียนสิทธิ</li>
+                    <li><i class="fa-solid fa-check text-success"></i> <strong>การจัดเก็บไฟล์:</strong> รูปถ่ายและเอกสารแนบจะถูกอัปโหลดขึ้น Supabase Database Vault ภายใต้การเข้ารหัสแบบปลอดภัย</li>
+                    <li><i class="fa-solid fa-check text-success"></i> <strong>การส่งต่อบัญชี:</strong> ชื่อและรายละเอียดธุรกรรมจะเชื่อมต่อกับ FlowAccount App เพื่อออกใบเสร็จภาษีถูกต้องตามกฎหมาย</li>
+                </ul>
+                <div class="pdpa-actions">
+                    <button class="btn btn-outline" onclick="togglePdpaModal()">ปิดหน้านี้</button>
+                    <button id="pdpa-accept-btn" class="btn btn-success" onclick="acceptPdpa()">
+                        <i class="fa-solid fa-circle-check"></i> ข้าพเจ้ายินยอม (Accept Consent)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crisp Live Chat simulation box -->
+    <div class="crisp-chat-simulation" id="crisp-widget" onclick="toggleCrispChat()">
+        <div class="crisp-header">
+            <span class="crisp-online-indicator"></span>
+            <span>Support Chat (Crisp Widget)</span>
+            <i class="fa-solid fa-chevron-up toggle-crisp-icon" id="crisp-chevron"></i>
+        </div>
+        <div class="crisp-chat-body hidden" id="crisp-body">
+            <div class="crisp-messages">
+                <div class="crisp-msg agent">สวัสดีครับ ยินดีต้อนรับสู่ eDocman Support! มีข้อสงสัยเรื่องเอกสารราชการไทยสอบถามได้เลยครับ</div>
+            </div>
+            <div class="crisp-input-area">
+                <input type="text" placeholder="พิมพ์ข้อความที่นี่..." onkeydown="sendCrispMessage(event)">
+                <button onclick="sendCrispMessageBtn()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

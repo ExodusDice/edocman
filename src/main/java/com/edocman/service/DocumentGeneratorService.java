@@ -1,0 +1,283 @@
+package com.edocman.service;
+
+import com.edocman.model.LegalServiceOrder;
+import org.springframework.stereotype.Service;
+import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+@Service
+public class DocumentGeneratorService {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public String generateHtmlDocument(LegalServiceOrder order, String customerName) {
+        String serviceType = order.getServiceType().name();
+        
+        // Parse JSON service data
+        Map<String, Object> data;
+        try {
+            data = objectMapper.readValue(order.getServiceData(), new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            data = Map.of();
+        }
+
+        StringBuilder html = new StringBuilder();
+        
+        // Shared HTML Header
+        html.append("<!DOCTYPE html>\n<html>\n<head>\n");
+        html.append("<meta charset=\"UTF-8\">\n");
+        html.append("<title>Official Document - " + order.getServiceType() + "</title>\n");
+        html.append("<style>\n");
+        html.append("  body { font-family: 'Prompt', 'Sarabun', sans-serif; color: #333; margin: 0; padding: 20px; line-height: 1.6; background: #fff; }\n");
+        html.append("  .document-container { max-width: 800px; margin: 0 auto; border: 1px solid #ccc; padding: 40px; position: relative; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }\n");
+        html.append("  .garuda-seal { text-align: center; margin-bottom: 20px; }\n");
+        html.append("  .garuda-seal svg { width: 80px; height: 80px; fill: red; }\n");
+        html.append("  .doc-title { text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 30px; text-decoration: underline; }\n");
+        html.append("  .section { margin-bottom: 20px; }\n");
+        html.append("  .section-title { font-weight: bold; border-bottom: 1px solid #333; margin-bottom: 10px; padding-bottom: 5px; }\n");
+        html.append("  .row { display: flex; justify-content: space-between; margin-bottom: 8px; }\n");
+        html.append("  .col { flex: 1; }\n");
+        html.append("  .label { font-weight: bold; color: #555; }\n");
+        html.append("  .value { border-bottom: 1px dotted #333; padding-left: 5px; display: inline-block; min-width: 150px; }\n");
+        html.append("  .footer-signature { margin-top: 50px; text-align: right; float: right; width: 250px; }\n");
+        html.append("  .signature-line { border-bottom: 1px solid #333; margin-top: 30px; height: 20px; }\n");
+        html.append("  .watermark { position: absolute; top: 35%; left: 25%; transform: rotate(-30deg); font-size: 80px; color: rgba(0,128,0,0.08); font-weight: bold; pointer-events: none; border: 10px double rgba(0,128,0,0.08); padding: 10px 20px; z-index: 1000; }\n");
+        html.append("  @media print {\n");
+        html.append("    body { padding: 0; background: #fff; }\n");
+        html.append("    .document-container { border: none; box-shadow: none; padding: 0; }\n");
+        html.append("  }\n");
+        html.append("</style>\n");
+        html.append("</head>\n<body>\n");
+        
+        html.append("<div class=\"document-container\">\n");
+        
+        // Watermark for status
+        if (order.getStatus() == LegalServiceOrder.OrderStatus.PAID || order.getStatus() == LegalServiceOrder.OrderStatus.PROCESSING) {
+            html.append("  <div class=\"watermark\">PENDING GOVT APPROVAL</div>\n");
+        } else if (order.getStatus() == LegalServiceOrder.OrderStatus.COMPLETED) {
+            html.append("  <div class=\"watermark\" style=\"color: rgba(0, 100, 0, 0.1); border-color: rgba(0, 100, 0, 0.1);\">OFFICIAL APPROVED</div>\n");
+        } else {
+            html.append("  <div class=\"watermark\" style=\"color: rgba(128, 0, 0, 0.08); border-color: rgba(128, 0, 0, 0.08);\">DRAFT / UNPAID</div>\n");
+        }
+
+        // Garuda Logo SVG representation
+        String garudaSvg = "<svg viewBox=\"0 0 512 512\">\n" +
+                "  <path d=\"M256,0 C256,0 230,80 200,100 C170,120 120,130 90,120 C60,110 50,70 50,70 C50,70 30,120 70,160 C110,200 150,210 180,200 C210,190 230,150 256,150 C282,150 302,190 332,200 C362,210 402,200 442,160 C482,120 462,70 462,70 C462,70 452,110 422,120 C392,130 342,120 312,100 C282,80 256,0 256,0 Z\"/>\n" +
+                "  <path d=\"M256,150 L256,400 L210,480 L256,512 L302,480 L256,400 Z\" style=\"fill:darkred;\"/>\n" +
+                "  <circle cx=\"256\" cy=\"200\" r=\"30\" style=\"fill:#d97706;\"/>\n" +
+                "</svg>";
+
+        html.append("  <div class=\"garuda-seal\">\n" + garudaSvg + "\n  </div>\n");
+
+        // Document specific body
+        switch (order.getServiceType()) {
+            case COMPANY_NAME_RESERVATION:
+                generateCompanyNameReservationHtml(html, order, data, customerName);
+                break;
+            case COMPANY_OPENING:
+                generateCompanyOpeningHtml(html, order, data, customerName);
+                break;
+            case COMPANY_CLOSING:
+                generateCompanyClosingHtml(html, order, data, customerName);
+                break;
+            case DBD_E_FILING:
+                generateEfilingHtml(html, order, data, customerName);
+                break;
+            case CAR_PRB_INSURANCE:
+                generateCarPrbHtml(html, order, data, customerName);
+                break;
+            case HOUSE_REGISTRATION_UPDATE:
+                generateHouseRegistrationHtml(html, order, data, customerName);
+                break;
+        }
+
+        // Shared Footer Signatures
+        html.append("  <div class=\"footer-signature\">\n");
+        html.append("    <p>ลงชื่อ / Signed: ................................................</p>\n");
+        html.append("    <p style=\"text-align:center;\"> ( " + customerName + " )<br>ผู้ขอรับบริการ / Applicant</p>\n");
+        html.append("    <p style=\"font-size:11px; color:#666; text-align:center;\">ยื่นเอกสารในรูปแบบอิเล็กทรอนิกส์ (Paperless e-Service)<br>วันที่ / Date: " + order.getCreatedAt().toLocalDate() + "</p>\n");
+        html.append("  </div>\n");
+        html.append("  <div style=\"clear:both;\"></div>\n");
+        
+        html.append("</div>\n</body>\n</html>");
+        
+        return html.toString();
+    }
+
+    private void generateCompanyNameReservationHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">ใบรับรองและคำขอจองชื่อนิติบุคคล (กรมพัฒนาธุรกิจการค้า)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลส่วนตัวผู้ขอจอง / Applicant Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อผู้ขอ / Full Name:</span> <span class=\"value\">" + customerName + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขบัตรประชาชน / Personal ID:</span> <span class=\"value\">" + data.getOrDefault("idCardNumber", "xxxxxxxxxxxxx") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เบอร์โทรศัพท์ / Tel:</span> <span class=\"value\">" + data.getOrDefault("phoneNumber", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">อีเมล / Email:</span> <span class=\"value\">" + data.getOrDefault("email", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">รายชื่อที่เสนอจอง (เรียงลำดับความต้องการ) / Proposed Company Names</div>\n");
+        html.append("    <p><strong>ชื่อลำดับที่ 1 / Choice 1:</strong> <span class=\"value\" style=\"min-width:350px;\">" + data.getOrDefault("nameChoice1", "-") + "</span></p>\n");
+        html.append("    <p><strong>ชื่อลำดับที่ 2 / Choice 2:</strong> <span class=\"value\" style=\"min-width:350px;\">" + data.getOrDefault("nameChoice2", "-") + "</span></p>\n");
+        html.append("    <p><strong>ชื่อลำดับที่ 3 / Choice 3:</strong> <span class=\"value\" style=\"min-width:350px;\">" + data.getOrDefault("nameChoice3", "-") + "</span></p>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ประเภทนิติบุคคลและวัตถุประสงค์ / Entity Type & Objectives</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ประเภทธุรกิจ / Entity Type:</span> <span class=\"value\">" + data.getOrDefault("entityType", "บริษัทจำกัด (Co., Ltd.)") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\" style=\"margin-top:10px;\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">วัตถุประสงค์โดยย่อ / Business Objective:</span> <span class=\"value\" style=\"width:80%; height:40px;\">" + data.getOrDefault("objective", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateCompanyOpeningHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">คำขอจดทะเบียนจัดตั้งบริษัทจำกัด (แบบ บอจ.1)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลบริษัท / Corporate Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อบริษัท (ภาษาไทย):</span> <span class=\"value\">" + data.getOrDefault("companyNameThai", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อบริษัท (English):</span> <span class=\"value\">" + data.getOrDefault("companyNameEng", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ทุนจดทะเบียน / Registered Capital:</span> <span class=\"value\">" + data.getOrDefault("registeredCapital", "1,000,000") + " บาท (THB)</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">มูลค่าต่อหุ้น / Par Value:</span> <span class=\"value\">" + data.getOrDefault("parValue", "100") + " บาท (THB)</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลที่ตั้งสำนักงานใหญ่ / Head Office Address</div>\n");
+        html.append("    <p><span class=\"value\" style=\"width:100%;\">" + data.getOrDefault("address", "-") + "</span></p>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">รายชื่อกรรมการและผู้ก่อการ / Directors and Promoters</div>\n");
+        html.append("    <p><strong>รายนามกรรมการ / Directors:</strong></p>\n");
+        html.append("    <p><span class=\"value\" style=\"width:100%;\">" + data.getOrDefault("directorsList", "-") + "</span></p>\n");
+        html.append("    <p><strong>สัดส่วนการถือหุ้นสัญชาติไทย / Thai Shareholding Ratio:</strong> <span class=\"value\">" + data.getOrDefault("thaiShareRatio", "100") + " %</span></p>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateCompanyClosingHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">คำขอจดทะเบียนเลิกนิติบุคคลและแต่งตั้งผู้ชำระบัญชี</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลนิติบุคคลที่เลิก / Dissolving Corporate Entity</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อบริษัท / Corporate Name:</span> <span class=\"value\">" + data.getOrDefault("companyName", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขทะเบียนนิติบุคคล / Corporate Registration ID:</span> <span class=\"value\">" + data.getOrDefault("registrationNumber", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลมติเลิกบริษัท / Dissolution Resolution Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">วันที่ประชุมผู้ถือหุ้น / Shareholder Meeting Date:</span> <span class=\"value\">" + data.getOrDefault("meetingDate", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">สาเหตุที่เลิกบริษัท / Reason for Dissolution:</span> <span class=\"value\">" + data.getOrDefault("dissolveReason", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ผู้ชำระบัญชี / Liquidator Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">นามผู้ชำระบัญชี / Liquidator Name:</span> <span class=\"value\">" + data.getOrDefault("liquidatorName", customerName) + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ที่ติดต่อผู้ชำระบัญชี / Contact Address:</span> <span class=\"value\">" + data.getOrDefault("liquidatorAddress", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateEfilingHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">ใบนำส่งงบการเงินผ่านระบบอิเล็กทรอนิกส์ (DBD e-Filing Slip)</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลนิติบุคคล / Entity Information</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อบริษัท / Company Name:</span> <span class=\"value\">" + data.getOrDefault("companyName", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขทะเบียนนิติบุคคล / Registration ID:</span> <span class=\"value\">" + data.getOrDefault("registrationNumber", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">รายละเอียดรอบปีบัญชีที่ส่งงบ / Financial Statement Round Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">รอบปีงบการเงิน / Financial Year Ending:</span> <span class=\"value\">" + data.getOrDefault("accountingYearEnd", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อผู้ตรวจสอบบัญชี / Auditor Name:</span> <span class=\"value\">" + data.getOrDefault("auditorName", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">สินทรัพย์รวม (THB) / Total Assets:</span> <span class=\"value\">" + data.getOrDefault("totalAssets", "0.00") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">รายได้รวม (THB) / Total Revenue:</span> <span class=\"value\">" + data.getOrDefault("totalRevenue", "0.00") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateCarPrbHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">ตารางกรมธรรม์ประกันภัยรถยนต์ภาคบังคับ (พ.ร.บ.) / Compulsory Motor Insurance Policy</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ผู้เอาประกันภัย / Insured Person</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อผู้เอาประกันภัย / Name:</span> <span class=\"value\">" + customerName + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขประจำตัว / ID Card:</span> <span class=\"value\">" + data.getOrDefault("idCardNumber", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลรถยนต์ / Vehicle Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขทะเบียนรถ / License Plate:</span> <span class=\"value\">" + data.getOrDefault("licensePlate", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">จังหวัด / Province:</span> <span class=\"value\">" + data.getOrDefault("province", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ยี่ห้อ / Brand:</span> <span class=\"value\">" + data.getOrDefault("vehicleBrand", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขตัวถัง / Chassis Number:</span> <span class=\"value\">" + data.getOrDefault("chassisNumber", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ระยะเวลาความคุ้มครองและเบี้ยประกัน / Coverage Period & Premium</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เริ่มคุ้มครอง / Start Date:</span> <span class=\"value\">" + data.getOrDefault("startDate", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">สิ้นสุดคุ้มครอง / End Date:</span> <span class=\"value\">" + data.getOrDefault("endDate", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เบี้ยประกันภัยสุทธิ / Net Premium:</span> <span class=\"value\">" + order.getPrice() + " บาท (THB)</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ประเภทความคุ้มครอง / Cover Type:</span> <span class=\"value\">รถยนต์นั่งส่วนบุคคลไม่เกิน 7 คน (Passenger Car)</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+    }
+
+    private void generateHouseRegistrationHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        html.append("  <div class=\"doc-title\">คำร้องขอปรับปรุงแก้ไขรายการทะเบียนราษฎรและทะเบียนบ้าน</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลที่ตั้งบ้าน / House Registration details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">รหัสประจำบ้าน / House Code ID:</span> <span class=\"value\">" + data.getOrDefault("houseCode", "-") + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ที่อยู่ตามทะเบียน / Address:</span> <span class=\"value\">" + data.getOrDefault("address", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">รายละเอียดการขอปรับปรุงรายการ / Amendment Details</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ประเภทคำร้อง / Update Type:</span> <span class=\"value\">" + data.getOrDefault("requestType", "ย้ายเข้า (Moving In)") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\" style=\"margin-top:10px;\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">รายชื่อบุคคลที่แจ้งจัดการ / Impacted Residents:</span> <span class=\"value\" style=\"width:100%;\">" + data.getOrDefault("residentsList", "-") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เอกสารแนบอ้างอิง / Supporting Uploads:</span> <span class=\"value\">" + (data.getOrDefault("attachmentUrl", null) != null ? "สำเนาบัตรประชาชน / สำเนาโฉนด" : "ไม่มีเอกสารแนบ") + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+    }
+}
