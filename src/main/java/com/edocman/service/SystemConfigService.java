@@ -18,20 +18,17 @@ public class SystemConfigService {
     @Value("${resend.simulation:true}")
     private boolean defaultResendSimulation;
 
-    @Value("${flowaccount.simulation:true}")
-    private boolean defaultFlowAccountSimulation;
+
 
     private boolean stripeSimulation;
     private boolean supabaseSimulation;
     private boolean resendSimulation;
-    private boolean flowAccountSimulation;
 
     @PostConstruct
     public void init() {
         this.stripeSimulation = defaultStripeSimulation;
         this.supabaseSimulation = defaultSupabaseSimulation;
         this.resendSimulation = defaultResendSimulation;
-        this.flowAccountSimulation = defaultFlowAccountSimulation;
     }
 
     public boolean isStripeSimulation() { return stripeSimulation; }
@@ -43,15 +40,13 @@ public class SystemConfigService {
     public boolean isResendSimulation() { return resendSimulation; }
     public void setResendSimulation(boolean val) { this.resendSimulation = val; }
 
-    public boolean isFlowAccountSimulation() { return flowAccountSimulation; }
-    public void setFlowAccountSimulation(boolean val) { this.flowAccountSimulation = val; }
+
 
     public Map<String, Boolean> getConfigMap() {
         Map<String, Boolean> configs = new HashMap<>();
         configs.put("stripeSimulation", stripeSimulation);
         configs.put("supabaseSimulation", supabaseSimulation);
         configs.put("resendSimulation", resendSimulation);
-        configs.put("flowAccountSimulation", flowAccountSimulation);
         return configs;
     }
 }

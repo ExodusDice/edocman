@@ -2,8 +2,10 @@ package com.edocman.controller;
 
 import com.edocman.model.LegalServiceOrder;
 import com.edocman.model.User;
+import com.edocman.model.ServicePrice;
 import com.edocman.repository.LegalServiceOrderRepository;
 import com.edocman.repository.UserRepository;
+import com.edocman.repository.ServicePriceRepository;
 import com.edocman.security.UserContext;
 import com.edocman.service.DocumentGeneratorService;
 import com.edocman.service.SupabaseStorageService;
@@ -17,11 +19,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import jakarta.annotation.PostConstruct;
 
 @RestController
 @RequestMapping("/api/orders")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class OrderController {
+
+    @Autowired
+    private ServicePriceRepository servicePriceRepository;
+
+    @PostConstruct
+    public void initPrices() {
+        if (servicePriceRepository.count() == 0) {
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.COMPANY_NAME_RESERVATION, new BigDecimal("490.00"), "จองชื่อบริษัท (DBD)", "จดทะเบียนธุรกิจ", "บริการจองชื่อบริษัทจำกัดผ่านระบบกรมพัฒนาธุรกิจการค้า (DBD) รวดเร็ว ถูกต้องตามหลักเกณฑ์", 2));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.COMPANY_OPENING, new BigDecimal("4900.00"), "จัดตั้งบริษัทจำกัด (บอจ.1)", "จดทะเบียนธุรกิจ", "บริการจดทะเบียนจัดตั้งบริษัทจำกัด (บอจ.1) เตรียมเอกสารจดทะเบียนครบวงจรพร้อมยื่นกรมพัฒนาธุรกิจการค้า", 5));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.COMPANY_CLOSING, new BigDecimal("9900.00"), "เลิกและชำระบัญชีบริษัท", "จดทะเบียนธุรกิจ", "บริการจดทะเบียนเลิกบริษัทและชำระบัญชี จัดการงานเอกสารและผู้สอบบัญชีครบวงจรเพื่อความถูกต้องทางกฎหมาย", 30));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.DBD_E_FILING, new BigDecimal("1900.00"), "นำส่งงบ e-Filing", "ภาษีและบัญชี", "บริการนำส่งงบการเงินผ่านระบบ DBD e-Filing ของกรมพัฒนาธุรกิจการค้า ประจำปีอย่างถูกต้องตามกำหนดเวลา", 3));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.CAR_PRB_INSURANCE, new BigDecimal("645.00"), "ประกันภัย พ.ร.บ. รถยนต์", "ประกันภัย", "บริการต่ออายุประกันภัยภาคบังคับ (พ.ร.บ. รถยนต์) คุ้มครองผู้ประสบภัยจากรถตามกฎหมาย", 1));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.HOUSE_REGISTRATION_UPDATE, new BigDecimal("990.00"), "แก้ไขข้อมูลทะเบียนบ้าน", "ทะเบียนราษฎร์", "บริการยื่นคำร้องขอแก้ไขข้อมูลทะเบียนบ้าน ย้ายเข้า-ย้ายออก หรือขอสมุดทะเบียนบ้านเล่มใหม่", 3));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.PDPA_BADGE_SETUP, new BigDecimal("890.00"), "ตราสัญลักษณ์ PDPA Badge", "ระบบและเทคโนโลยี", "บริการประเมินและตั้งค่าตราสัญลักษณ์ PDPA Consent Badge สำหรับแสดงบนเว็บไซต์ เพื่อความสอดคล้องกับ พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล", 2));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.COMPANY_NAME_CHANGE, new BigDecimal("1900.00"), "จดทะเบียนเปลี่ยนชื่อบริษัท", "จดทะเบียนธุรกิจ", "บริการจดทะเบียนเปลี่ยนชื่อบริษัทจำกัด ยื่นขอแก้ไขตราประทับและหนังสือบริคณห์สนธิที่กรมพัฒนาธุรกิจการค้า", 5));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.MEMORANDUM_AMENDMENT, new BigDecimal("2900.00"), "แก้ไขหนังสือบริคณห์สนธิ", "จดทะเบียนธุรกิจ", "บริการยื่นคำขอแก้ไขเพิ่มเติมหนังสือบริคณห์สนธิ (มติพิเศษ) ต่อกรมพัฒนาธุรกิจการค้า", 5));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.FINANCIAL_STATEMENT_PREP, new BigDecimal("4500.00"), "จัดทำงบการเงินประจำปี", "ภาษีและบัญชี", "บริการจัดทำงบแสดงฐานะการเงิน งบกำไรขาดทุน และรายละเอียดประกอบงบการเงินสำหรับนิติบุคคล", 10));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.COMPANY_DIRECTOR_CHANGE, new BigDecimal("1900.00"), "เปลี่ยนตัวกรรมการ (เจ้าของ)", "จดทะเบียนธุรกิจ", "บริการจดทะเบียนเปลี่ยนตัวกรรมการบริษัท เข้าหรือออก ยื่นคำขอพร้อมรายงานผู้ถือหุ้นและกรรมการใหม่", 3));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.SHAREHOLDER_UPDATE, new BigDecimal("1200.00"), "แก้ไขรายชื่อผู้ถือหุ้น (บอจ.5)", "จดทะเบียนธุรกิจ", "บริการยื่นบัญชีรายชื่อผู้ถือหุ้น (บอจ.5) ฉบับล่าสุด หรือกรณีมีการสลับ/โอนหุ้น ระหว่างปี", 2));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.FINANCIAL_STATEMENT_AUDIT, new BigDecimal("7500.00"), "ตรวจสอบงบการเงิน (CPA)", "ภาษีและบัญชี", "บริการตรวจสอบบัญชีโดยผู้สอบบัญชีรับอนุญาต (CPA) แสดงความเห็นต่องบการเงินตามมาตรฐานการรายงานทางการเงิน", 15));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.FINANCIAL_STATEMENT_APPROVAL, new BigDecimal("1500.00"), "อนุมัติงบการเงิน (AGM)", "ภาษีและบัญชี", "บริการจัดการส่งรายงานการประชุมสามัญผู้ถือหุ้นประจำปี (AGM) เพื่ออนุมัติงบการเงิน", 5));
+            servicePriceRepository.save(new ServicePrice(LegalServiceOrder.ServiceType.SMART_ETAX, new BigDecimal("2500.00"), "ระบบ Smart e-Tax Invoice", "ภาษีและบัญชี", "ระบบยื่นขอใบกำกับภาษีอิเล็กทรอนิกส์และใบรับอิเล็กทรอนิกส์ (e-Tax Invoice & e-Receipt) กับกรมสรรพากร", 7));
+        }
+    }
 
     @Autowired
     private LegalServiceOrderRepository orderRepository;
@@ -197,40 +224,9 @@ public class OrderController {
 
     private BigDecimal getStandardPrice(LegalServiceOrder.ServiceType type) {
         if (type == null) return BigDecimal.ZERO;
-        switch (type) {
-            case COMPANY_NAME_RESERVATION:
-                return new BigDecimal("490.00");
-            case COMPANY_OPENING:
-                return new BigDecimal("4900.00");
-            case COMPANY_CLOSING:
-                return new BigDecimal("9900.00");
-            case DBD_E_FILING:
-                return new BigDecimal("1900.00");
-            case CAR_PRB_INSURANCE:
-                return new BigDecimal("645.00");
-            case HOUSE_REGISTRATION_UPDATE:
-                return new BigDecimal("990.00");
-            case PDPA_BADGE_SETUP:
-                return new BigDecimal("890.00");
-            case COMPANY_NAME_CHANGE:
-                return new BigDecimal("1900.00");
-            case MEMORANDUM_AMENDMENT:
-                return new BigDecimal("2900.00");
-            case FINANCIAL_STATEMENT_PREP:
-                return new BigDecimal("4500.00");
-            case COMPANY_DIRECTOR_CHANGE:
-                return new BigDecimal("1900.00");
-            case SHAREHOLDER_UPDATE:
-                return new BigDecimal("1200.00");
-            case FINANCIAL_STATEMENT_AUDIT:
-                return new BigDecimal("7500.00");
-            case FINANCIAL_STATEMENT_APPROVAL:
-                return new BigDecimal("1500.00");
-            case SMART_ETAX:
-                return new BigDecimal("2500.00");
-            default:
-                return new BigDecimal("1000.00");
-        }
+        return servicePriceRepository.findById(type)
+                .map(ServicePrice::getPrice)
+                .orElse(new BigDecimal("1000.00"));
     }
 
     @PostMapping("/bulk")

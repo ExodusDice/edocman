@@ -4,8 +4,9 @@ import com.edocman.model.LegalServiceOrder;
 import com.edocman.model.User;
 import com.edocman.repository.LegalServiceOrderRepository;
 import com.edocman.repository.UserRepository;
+import com.edocman.repository.ServicePriceRepository;
+import com.edocman.model.ServicePrice;
 import com.edocman.security.UserContext;
-import com.edocman.service.FlowAccountSyncService;
 import com.edocman.service.ResendEmailService;
 import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
@@ -32,10 +33,10 @@ public class PaymentController {
     private com.edocman.service.StripePaymentService stripePaymentService;
 
     @Autowired
-    private FlowAccountSyncService flowAccountSyncService;
+    private ResendEmailService resendEmailService;
 
     @Autowired
-    private ResendEmailService resendEmailService;
+    private ServicePriceRepository servicePriceRepository;
 
     @Value("${stripe.webhook.secret}")
     private String webhookSecret;
@@ -180,7 +181,7 @@ public class PaymentController {
         }
 
         if (anyProcessed) {
-            return ResponseEntity.ok("{\"status\": \"success\", \"message\": \"Simulated payment processed, notification emails sent, FlowAccount synchronization initialized.\"}");
+            return ResponseEntity.ok("{\"status\": \"success\", \"message\": \"Simulated payment processed, notification emails sent.\"}");
         } else {
             return ResponseEntity.status(500).body("{\"error\": \"Simulation failed\"}");
         }
@@ -209,11 +210,13 @@ public class PaymentController {
         String name = userOpt.isPresent() ? userOpt.get().getFullName() : "ลูกค้า eDocman";
         if (name == null || name.isEmpty()) name = "ลูกค้า eDocman";
 
-        // 1. Sync to FlowAccount
-        try {
-            flowAccountSyncService.syncOrderToFlowAccount(order, email, name);
-        } catch (Exception e) {
-            System.err.println("FlowAccount sync failed: " + e.getMessage());
+
+
+        // Load the SLA days from the database
+        int slaDays = 5;
+        Optional<ServicePrice> priceOpt = servicePriceRepository.findById(order.getServiceType());
+        if (priceOpt.isPresent()) {
+            slaDays = priceOpt.get().getSlaDays();
         }
 
         // 2. Send transaction confirmation email via Resend
@@ -223,7 +226,19 @@ public class PaymentController {
                 "<p>เรียนคุณ " + name + ",</p>" +
                 "<p>เราได้รับยอดชำระเงินเรียบร้อยแล้ว สำหรับบริการ: <strong>" + serviceName + "</strong></p>" +
                 "<p><strong>ยอดชำระ:</strong> " + order.getPrice() + " บาท (THB)</p>" +
-                "<p>ขณะนี้คำร้องของคุณถูกส่งเข้าระบบ Paperless ไปยังหน่วยงานภาครัฐเรียบร้อยแล้ว ทีมงาน eDocman กำลังดำเนินการในขั้นตอนต่อไป</p>" +
+                "<p><strong>กำหนดระยะเวลาดำเนินการ (SLA):</strong> " + slaDays + " วันทำการ (Working Days)</p>" +
+                "<p style='font-size: 12px; color: #d97706; margin-top: -10px;'><em>*หมายเหตุ: ระยะเวลา SLA นับเฉพาะวันทำการปกติ ไม่นับรวมวันเสาร์ วันอาทิตย์ และวันหยุดราชการ/วันหยุดนักขัตฤกษ์ตามปฏิทินไทย</em></p>" +
+                "<br>" +
+                "<div style='border: 1px solid #cbd5e1; background-color: #f8fafc; padding: 15px; border-radius: 6px; font-size: 13px; line-height: 1.5; color: #334155;'>" +
+                "  <strong style='color:#1e293b;'>ข้อกำหนดการใช้งานและคำเตือน (Terms of Use & Warning):</strong>" +
+                "  <ul style='margin-top: 8px; padding-left: 20px;'>" +
+                "    <li><strong>การเริ่มนับ SLA:</strong> ระยะเวลา SLA จะเริ่มนับเมื่อทางแอดมินตรวจสอบแล้วพบว่าข้อมูลและเอกสารที่ท่านส่งมาในแบบฟอร์มมีความถูกต้องและครบถ้วนสมบูรณ์แล้ว</li>" +
+                "    <li><strong>คำเตือน (Warning):</strong> หากเอกสารที่ท่านอัปโหลดไม่ถูกต้อง ไม่ชัดเจน หรือข้อมูลไม่ครบถ้วน ระยะเวลา SLA จะถูกระงับชั่วคราว (Paused) ทันที และจะเริ่มนับต่อเมื่อได้รับเอกสารที่แก้ไขเสร็จสิ้น</li>" +
+                "    <li><strong>การรับประกันการคืนเงิน (Refund Policy):</strong> หาก eDocman ไม่สามารถดำเนินการยื่นคำขอให้กับภาครัฐได้สำเร็จภายในกำหนดเวลา SLA ดังกล่าวอันมีสาเหตุจากความล่าช้าในขั้นตอนของระบบ eDocman เอง (ยกเว้นความล่าช้าอันเนื่องจากระบบรับเรื่องของภาครัฐขัดข้อง หรือเหตุสุดวิสัยอื่นๆ) ท่านมีสิทธิ์ขอรับเงินคืนเต็มจำนวน (100% Full Refund) ของค่าบริการนี้</li>" +
+                "  </ul>" +
+                "</div>" +
+                "<br>" +
+                "<p>ขณะนี้คำร้องของคุณถูกส่งเข้าระบบ Paperless เรียบร้อยแล้ว ทีมงาน eDocman กำลังตรวจสอบเอกสารของท่านและจะดำเนินการในขั้นตอนต่อไปอย่างรวดเร็วที่สุด</p>" +
                 "<p>คุณสามารถดาวน์โหลดแบบฟอร์มที่กรอกข้อมูลสมบูรณ์ หรือตรวจสอบสถานะได้ตลอดเวลาผ่านทาง แดชบอร์ด eDocman ของคุณ</p>" +
                 "<br>" +
                 "<p>ขอแสดงความนับถือ,<br>ทีมงาน eDocman</p>";

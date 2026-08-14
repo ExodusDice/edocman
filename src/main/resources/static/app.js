@@ -86,6 +86,8 @@ function showSection(sectionId) {
             fetchAdminOrders();
             loadAdminUsers();
             loadAdminConfig();
+            loadAdminServices();
+            loadAdminServiceHistory();
         } else {
             document.getElementById('admin-login-panel').classList.remove('hidden');
             document.getElementById('admin-dashboard-panel').classList.add('hidden');
@@ -502,7 +504,6 @@ function fetchOrders() {
                     </div>
                     <div class="order-price">
                         <strong>${o.price.toLocaleString('th-TH')} บาท</strong>
-                        ${o.flowAccountSyncStatus === 'SYNCED' ? '<span class="text-success" style="font-size:11px; display:block;"><i class="fa-solid fa-check-circle"></i> ออกใบเสร็จภาษีแล้ว</span>' : ''}
                     </div>
                     <div style="display:flex; justify-content:flex-end; gap: 8px;">
                         ${statusBadge}
@@ -1327,20 +1328,9 @@ function fetchAdminOrders() {
                 '<span class="text-success"><i class="fa-solid fa-credit-card"></i> ได้รับเงิน (Stripe)</span>' : 
                 '<span class="text-muted"><i class="fa-solid fa-clock"></i> ค้างจ่าย</span>';
 
-            let syncBadge = '';
-            if (o.flowAccountSyncStatus === 'SYNCED') {
-                syncBadge = `<button class="btn btn-outline btn-sm" onclick="viewFlowAccountLogs(${o.id})" style="padding: 2px 6px; font-size:11px; color:#10b981; border-color:#10b981;"><i class="fa-solid fa-file-invoice-dollar"></i> Synced (Audit)</button>`;
-            } else if (o.flowAccountSyncStatus === 'FAILED') {
-                syncBadge = `<button class="btn btn-outline btn-sm" onclick="viewFlowAccountLogs(${o.id})" style="padding: 2px 6px; font-size:11px; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Failed (Audit)</button>`;
-            } else {
-                syncBadge = '<span class="text-muted" style="font-size:11px;"><i class="fa-solid fa-minus"></i> ยังไม่ได้เชื่อม</span>';
-            }
-
             let actions = '';
             if (o.status === 'PAID') {
-                actions = `
-                    <button class="btn btn-outline btn-sm" onclick="updateAdminOrderStatus(${o.id}, 'PROCESSING')" style="color:#0ea5e9; border-color:#0ea5e9;">ตรวจสอบคำขอ</button>
-                `;
+                actions = `<button class="btn btn-outline btn-sm" onclick="updateAdminOrderStatus(${o.id}, 'PROCESSING')" style="color:#0ea5e9; border-color:#0ea5e9;">ตรวจสอบคำขอ</button>`;
             } else if (o.status === 'PROCESSING') {
                 actions = `
                     <button class="btn btn-success btn-sm" onclick="approveAdminOrder(${o.id})"><i class="fa-solid fa-circle-check"></i> อนุมัติคำขอ</button>
@@ -1356,7 +1346,6 @@ function fetchAdminOrders() {
                     <td>${o.clerkUserId}</td>
                     <td><strong>${translateServiceType(o.serviceType)}</strong></td>
                     <td>${stripeBadge}</td>
-                    <td>${syncBadge}</td>
                     <td>${statusText}</td>
                     <td><div style="display:flex; gap:5px;">${actions}</div></td>
                 </tr>
@@ -1391,32 +1380,7 @@ function approveAdminOrder(orderId) {
     .catch(err => console.error(err));
 }
 
-function viewFlowAccountLogs(orderId) {
-    fetch(`/api/admin/logs/${orderId}`)
-    .then(res => res.json())
-    .then(logs => {
-        const logsPanel = document.getElementById('flowaccount-log-details');
-        const reqPre = document.getElementById('fa-log-request');
-        const resPre = document.getElementById('fa-log-response');
 
-        if (!logs || logs.length === 0) {
-            alert("ไม่พบบันทึกการเชื่อมโยง API ของออเดอร์นี้");
-            logsPanel.classList.add('hidden');
-            return;
-        }
-
-        const log = logs[logs.length - 1]; // get latest log
-        
-        reqPre.innerText = formatJsonString(log.requestPayload);
-        resPre.innerText = formatJsonString(log.responsePayload);
-        
-        logsPanel.classList.remove('hidden');
-        
-        // Scroll to audit card
-        document.getElementById('flowaccount-audit-card').scrollIntoView({ behavior: 'smooth' });
-    })
-    .catch(err => console.error("Failed to load logs:", err));
-}
 
 // PDPA Compliance Badge Controller
 function togglePdpaModal() {
@@ -1586,7 +1550,14 @@ function switchAdminTab(tabName) {
     document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
     
     document.getElementById('admin-tab-' + tabName).classList.remove('hidden');
-    event.currentTarget.classList.add('active');
+    if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
+    }
+    
+    if (tabName === 'cms-services-tab') {
+        loadAdminServices();
+        loadAdminServiceHistory();
+    }
 }
 
 function loadAdminUsers() {
@@ -1645,7 +1616,7 @@ function loadAdminConfig() {
         document.getElementById('sim-toggle-stripe').checked = configs.stripeSimulation;
         document.getElementById('sim-toggle-supabase').checked = configs.supabaseSimulation;
         document.getElementById('sim-toggle-resend').checked = configs.resendSimulation;
-        document.getElementById('sim-toggle-flowaccount').checked = configs.flowAccountSimulation;
+
     })
     .catch(err => console.error("Error loading settings configurations:", err));
 }
@@ -2202,3 +2173,234 @@ function deleteUserAccount(userId) {
     })
     .catch(err => alert(err.message));
 }
+
+// ==========================================
+// Service Prices CMS & History Tracking
+// ==========================================
+let cmsServices = [];
+
+function loadAdminServices() {
+    fetch('/api/admin/prices', {
+        headers: {
+            'Authorization': 'Bearer ' + currentToken
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("ไม่สามารถดึงข้อมูลราคาค่าบริการได้");
+        return res.json();
+    })
+    .then(services => {
+        cmsServices = services;
+        
+        // Populate category filter and datalist options
+        const categories = [...new Set(services.map(s => s.category).filter(Boolean))];
+        
+        const filterSelect = document.getElementById('cms-category-filter');
+        const currentFilterVal = filterSelect.value;
+        filterSelect.innerHTML = '<option value="">ทั้งหมด (All Categories)</option>';
+        categories.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat;
+            opt.innerText = cat;
+            filterSelect.appendChild(opt);
+        });
+        filterSelect.value = currentFilterVal;
+
+        const datalist = document.getElementById('category-datalist');
+        datalist.innerHTML = '';
+        categories.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat;
+            datalist.appendChild(opt);
+        });
+
+        renderCmsServices();
+    })
+    .catch(err => {
+        console.error("Error loading CMS services:", err);
+    });
+}
+
+function renderCmsServices() {
+    const tbody = document.getElementById('cms-services-tbody');
+    if (!cmsServices || cmsServices.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;" class="text-muted">กำลังโหลดข้อมูล...</td></tr>';
+        return;
+    }
+
+    const filterVal = document.getElementById('cms-category-filter').value;
+    const searchVal = document.getElementById('cms-search-input').value.toLowerCase().trim();
+
+    let filtered = cmsServices;
+    if (filterVal) {
+        filtered = filtered.filter(s => s.category === filterVal);
+    }
+    if (searchVal) {
+        filtered = filtered.filter(s => 
+            s.nameTh.toLowerCase().includes(searchVal) || 
+            s.serviceType.toLowerCase().includes(searchVal) || 
+            (s.contentTh && s.contentTh.toLowerCase().includes(searchVal))
+        );
+    }
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;" class="text-muted">ไม่พบข้อมูลบริการที่ตรงกับเงื่อนไขการค้นหา</td></tr>';
+        return;
+    }
+
+    let html = '';
+    filtered.forEach(s => {
+        const desc = s.contentTh ? s.contentTh : '-';
+        html += `
+            <tr>
+                <td><strong>${s.nameTh}</strong></td>
+                <td class="font-mono" style="font-size:12px;">${s.serviceType}</td>
+                <td><span class="badge" style="font-size:11px; background:#475569; color:#fff; padding: 4px 8px; border-radius: 4px;">${s.category || 'ทั่วไป'}</span></td>
+                <td style="font-size:13px; line-height:1.4; color:var(--text-muted);">${desc}</td>
+                <td class="font-mono" style="font-weight:600; color:var(--text-light); text-align:center;">${s.slaDays || 5} วัน</td>
+                <td class="font-mono" style="font-weight:600; color:var(--primary); white-space:nowrap;">${Number(s.price).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="openEditServiceModal('${s.serviceType}')" style="padding: 4px 10px; font-size:12px;">
+                        <i class="fa-solid fa-pen-to-square"></i> แก้ไข
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
+
+function filterCmsServices() {
+    renderCmsServices();
+}
+
+function loadAdminServiceHistory() {
+    fetch('/api/admin/prices/history', {
+        headers: {
+            'Authorization': 'Bearer ' + currentToken
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("ไม่สามารถดึงข้อมูลประวัติการแก้ไขราคาได้");
+        return res.json();
+    })
+    .then(historyList => {
+        const tbody = document.getElementById('cms-history-tbody');
+        if (!historyList || historyList.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;" class="text-muted">ไม่มีประวัติการแก้ไขข้อมูลล่าสุด (ย้อนหลัง 6 เดือน)</td></tr>';
+            return;
+        }
+
+        let html = '';
+        historyList.forEach(h => {
+            const date = new Date(h.changedAt);
+            const dateStr = date.toLocaleString('th-TH', { 
+                year: 'numeric', month: 'short', day: 'numeric', 
+                hour: '2-digit', minute: '2-digit' 
+            });
+
+            // Compile the list of changes
+            let changes = [];
+            if (h.oldNameTh !== h.newNameTh) {
+                changes.push(`ชื่อ: "${h.oldNameTh}" &rarr; "${h.newNameTh}"`);
+            }
+            if (Number(h.oldPrice) !== Number(h.newPrice)) {
+                changes.push(`ราคา: ${Number(h.oldPrice).toLocaleString('th-TH', {minimumFractionDigits:2})} &rarr; ${Number(h.newPrice).toLocaleString('th-TH', {minimumFractionDigits:2})} THB`);
+            }
+            if (h.oldCategory !== h.newCategory) {
+                changes.push(`หมวดหมู่: "${h.oldCategory || 'ทั่วไป'}" &rarr; "${h.newCategory || 'ทั่วไป'}"`);
+            }
+            if (h.oldContentTh !== h.newContentTh) {
+                changes.push(`รายละเอียด: มีการปรับปรุงเนื้อหาคำอธิบาย`);
+            }
+            if (h.oldSlaDays !== h.newSlaDays) {
+                changes.push(`SLA: ${h.oldSlaDays || 5} วัน &rarr; ${h.newSlaDays || 5} วัน`);
+            }
+
+            const changesHtml = changes.length > 0 ? changes.join('<br>') : 'ไม่มีการเปลี่ยนแปลงฟิลด์หลัก';
+
+            // Find Th service name by type or use code
+            const svc = cmsServices.find(s => s.serviceType === h.serviceType);
+            const serviceName = svc ? svc.nameTh : h.serviceType;
+
+            html += `
+                <tr>
+                    <td style="font-size:12px; white-space:nowrap; vertical-align: top;">${dateStr}</td>
+                    <td style="vertical-align: top;"><strong>${serviceName}</strong><br><small class="text-muted">${h.serviceType}</small></td>
+                    <td style="font-size:13px; line-height:1.4; vertical-align: top;">${changesHtml}</td>
+                    <td style="vertical-align: top;"><span class="badge" style="background:rgba(255,255,255,0.08); color:var(--text-light); font-family:monospace; font-size:11px; padding: 4px 8px; border-radius: 4px;">${h.changedBy}</span></td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    })
+    .catch(err => {
+        console.error("Error loading price history:", err);
+    });
+}
+
+function openEditServiceModal(serviceType) {
+    const s = cmsServices.find(item => item.serviceType === serviceType);
+    if (!s) return;
+
+    document.getElementById('edit-service-type').value = s.serviceType;
+    document.getElementById('edit-service-name').value = s.nameTh;
+    document.getElementById('edit-service-category').value = s.category || 'ทั่วไป';
+    document.getElementById('edit-service-price').value = s.price;
+    document.getElementById('edit-service-sla').value = s.slaDays || 5;
+    document.getElementById('edit-service-content').value = s.contentTh || '';
+
+    document.getElementById('edit-service-modal').classList.remove('hidden');
+}
+
+function closeEditServiceModal() {
+    document.getElementById('edit-service-modal').classList.add('hidden');
+}
+
+function handleEditServiceSubmit(event) {
+    event.preventDefault();
+
+    const serviceType = document.getElementById('edit-service-type').value;
+    const nameTh = document.getElementById('edit-service-name').value.trim();
+    const category = document.getElementById('edit-service-category').value.trim();
+    const price = document.getElementById('edit-service-price').value.trim();
+    const slaDays = document.getElementById('edit-service-sla').value.trim();
+    const contentTh = document.getElementById('edit-service-content').value.trim();
+
+    const params = new URLSearchParams({
+        serviceType,
+        price,
+        nameTh,
+        category,
+        contentTh,
+        slaDays
+    });
+
+    fetch(`/api/admin/prices/update?${params.toString()}`, {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + currentToken
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("ไม่สามารถบันทึกการแก้ไขบริการได้");
+        return res.json();
+    })
+    .then(() => {
+        alert("บันทึกการแก้ไขข้อมูลบริการเรียบร้อยแล้ว");
+        closeEditServiceModal();
+        loadAdminServices();
+        loadAdminServiceHistory();
+    })
+    .catch(err => {
+        alert(err.message);
+    });
+}
+
+// Attach functions to window scope for HTML click handlers
+window.loadAdminServices = loadAdminServices;
+window.loadAdminServiceHistory = loadAdminServiceHistory;
+window.filterCmsServices = filterCmsServices;
+window.openEditServiceModal = openEditServiceModal;
+window.closeEditServiceModal = closeEditServiceModal;
+window.handleEditServiceSubmit = handleEditServiceSubmit;

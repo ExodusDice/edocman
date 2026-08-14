@@ -42,9 +42,7 @@ public class LegalServiceOrder {
 
     private String stripePaymentStatus;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private SyncStatus flowAccountSyncStatus = SyncStatus.NOT_SYNCED;
+
 
     private String documentUrl; // Pre-filled government form download
 
@@ -59,7 +57,7 @@ public class LegalServiceOrder {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (currency == null) currency = "THB";
-        if (flowAccountSyncStatus == null) flowAccountSyncStatus = SyncStatus.NOT_SYNCED;
+
     }
 
     @PreUpdate
@@ -94,9 +92,5 @@ public class LegalServiceOrder {
         FAILED
     }
 
-    public enum SyncStatus {
-        NOT_SYNCED,
-        SYNCED,
-        FAILED
-    }
+
 }

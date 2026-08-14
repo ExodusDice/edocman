@@ -1,11 +1,13 @@
 package com.edocman.controller;
 
-import com.edocman.model.FlowAccountSyncLog;
 import com.edocman.model.LegalServiceOrder;
 import com.edocman.model.User;
-import com.edocman.repository.FlowAccountSyncLogRepository;
+import com.edocman.model.ServicePrice;
+import com.edocman.model.ServicePriceHistory;
 import com.edocman.repository.LegalServiceOrderRepository;
 import com.edocman.repository.UserRepository;
+import com.edocman.repository.ServicePriceRepository;
+import com.edocman.repository.ServicePriceHistoryRepository;
 import com.edocman.service.SystemConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +22,15 @@ import java.util.Optional;
 public class AdminController {
 
     @Autowired
-    private LegalServiceOrderRepository orderRepository;
+    private ServicePriceRepository servicePriceRepository;
 
     @Autowired
-    private FlowAccountSyncLogRepository logRepository;
+    private ServicePriceHistoryRepository priceHistoryRepository;
+
+    @Autowired
+    private LegalServiceOrderRepository orderRepository;
+
+
 
     @Autowired
     private UserRepository userRepository;
@@ -122,10 +129,7 @@ public class AdminController {
         }
     }
 
-    @GetMapping("/logs/{orderId}")
-    public ResponseEntity<List<FlowAccountSyncLog>> getLogsByOrderId(@PathVariable Long orderId) {
-        return ResponseEntity.ok(logRepository.findByOrderId(orderId));
-    }
+
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
@@ -194,9 +198,7 @@ public class AdminController {
             case "resend":
                 systemConfigService.setResendSimulation(value);
                 break;
-            case "flowaccount":
-                systemConfigService.setFlowAccountSimulation(value);
-                break;
+
             default:
                 return ResponseEntity.badRequest().body("{\"error\": \"Invalid config key\"}");
         }
@@ -264,5 +266,75 @@ public class AdminController {
         } finally {
             systemConfigService.setResendSimulation(originalSimulation);
         }
+    }
+
+    @GetMapping("/prices")
+    public ResponseEntity<List<ServicePrice>> getServicePrices() {
+        return ResponseEntity.ok(servicePriceRepository.findAll());
+    }
+
+    @PostMapping("/prices/update")
+    public ResponseEntity<?> updateServicePrice(
+            @RequestParam LegalServiceOrder.ServiceType serviceType,
+            @RequestParam java.math.BigDecimal price,
+            @RequestParam String nameTh,
+            @RequestParam String category,
+            @RequestParam(required = false) String contentTh,
+            @RequestParam Integer slaDays) {
+        
+        Optional<ServicePrice> priceOpt = servicePriceRepository.findById(serviceType);
+        if (priceOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        ServicePrice servicePrice = priceOpt.get();
+        
+        // Determine the user making the change
+        String clerkUserId = com.edocman.security.UserContext.getCurrentUser();
+        String changedBy = "sadminwa";
+        if (clerkUserId != null) {
+            Optional<User> userOpt = userRepository.findByClerkUserId(clerkUserId);
+            if (userOpt.isPresent()) {
+                changedBy = userOpt.get().getEmail();
+            } else if (clerkUserId.contains("sadminwa")) {
+                changedBy = "sadminwa";
+            } else {
+                changedBy = clerkUserId;
+            }
+        }
+        
+        // Log history entry
+        ServicePriceHistory history = ServicePriceHistory.builder()
+                .serviceType(serviceType)
+                .oldPrice(servicePrice.getPrice())
+                .newPrice(price)
+                .oldNameTh(servicePrice.getNameTh())
+                .newNameTh(nameTh)
+                .oldCategory(servicePrice.getCategory())
+                .newCategory(category)
+                .oldContentTh(servicePrice.getContentTh())
+                .newContentTh(contentTh)
+                .oldSlaDays(servicePrice.getSlaDays())
+                .newSlaDays(slaDays)
+                .changedBy(changedBy)
+                .changedAt(java.time.LocalDateTime.now())
+                .build();
+        priceHistoryRepository.save(history);
+        
+        // Update the service
+        servicePrice.setPrice(price);
+        servicePrice.setNameTh(nameTh);
+        servicePrice.setCategory(category);
+        servicePrice.setContentTh(contentTh);
+        servicePrice.setSlaDays(slaDays);
+        servicePriceRepository.save(servicePrice);
+        
+        return ResponseEntity.ok(servicePrice);
+    }
+
+    @GetMapping("/prices/history")
+    public ResponseEntity<List<ServicePriceHistory>> getPriceHistory() {
+        java.time.LocalDateTime sixMonthsAgo = java.time.LocalDateTime.now().minusMonths(6);
+        return ResponseEntity.ok(priceHistoryRepository.findByChangedAtAfterOrderByChangedAtDesc(sixMonthsAgo));
     }
 }

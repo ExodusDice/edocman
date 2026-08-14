@@ -40,7 +40,6 @@
                 <a href="#services" onclick="showSection('landing')">บริการของเรา</a>
                 <a href="#how-it-works" onclick="showSection('landing')">ขั้นตอนใช้งาน</a>
                 <a href="#" id="nav-dashboard-link" class="hidden" onclick="showSection('dashboard')">แดชบอร์ด</a>
-                <a href="#" id="nav-admin-link" onclick="showSection('admin')">ระบบแอดมิน / รัฐบาล</a>
             </nav>
 
             <div class="auth-buttons">
@@ -67,8 +66,13 @@
         <div class="hero">
             <div class="container hero-container">
                 <div class="hero-text">
-                    <div class="badge-paperless">
-                        <i class="fa-solid fa-leaf"></i> ทางเลือกไร้กระดาษ 100%
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                        <div class="badge-paperless" style="margin-bottom:0;">
+                            <i class="fa-solid fa-leaf"></i> ทางเลือกไร้กระดาษ 100%
+                        </div>
+                        <div class="badge-paperless" style="margin-bottom:0; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981;">
+                            <i class="fa-solid fa-shield-heart"></i> การันตี SLA ช้าคืนเงิน 100%
+                        </div>
                     </div>
                     <h1>หมดกังวลเรื่องเอกสารราชการไทย</h1>
                     <p class="subtitle">ระบบจัดการเอกสารกฎหมายและการจดทะเบียนภาครัฐ (DBD, พ.ร.บ., ทะเบียนบ้าน) แบบดิจิทัลเต็มรูปแบบ ไม่ต้องปรินท์ ไม่ต้องรอคิว เชื่อมโยงบัญชีและรับชำระเงินในที่เดียว</p>
@@ -77,6 +81,16 @@
                             เริ่มใช้บริการดิจิทัล <i class="fa-solid fa-arrow-right"></i>
                         </button>
                         <a href="#services" class="btn btn-outline btn-lg">ดูบริการทั้งหมด</a>
+                    </div>
+                    <div class="hero-trust-marks" style="display: flex; gap: 20px; margin-top: 30px; align-items: center; flex-wrap: wrap;">
+                        <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight:600;">ความปลอดภัยและมาตรฐาน:</span>
+                        <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+                            <img src="/stripe-trust.jpg" alt="Stripe Verified Partner" style="height: 24px; border-radius: 4px; opacity: 0.7; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+                            <img src="/promptpay-trust.png" alt="PromptPay" style="height: 22px; border-radius: 3px; opacity: 0.7; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+                            <img src="/pdpa-trust.png" alt="PDPA Compliance" style="height: 28px; opacity: 0.7; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+                            <img src="/moneyback-trust.png" alt="100% Money Back Guaranteed" style="height: 34px; opacity: 0.7; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+                            <img src="/google-reviews-trust.png" alt="Google Reviews" style="height: 26px; opacity: 0.7; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+                        </div>
                     </div>
                 </div>
                 <div class="hero-image">
@@ -102,13 +116,7 @@
                                     <span>ชำระผ่าน PromptPay QR • ออกกรมธรรม์ทันที</span>
                                 </div>
                             </div>
-                            <div class="vault-row">
-                                <i class="fa-solid fa-sync text-primary fa-spin"></i>
-                                <div>
-                                    <strong>ลงบัญชีบริษัท (FlowAccount API)</strong>
-                                    <span>สร้างใบรับเงินและเชื่อมข้อมูลอัตโนมัติ</span>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -120,6 +128,10 @@
             <div class="section-header">
                 <h2>บริการดิจิทัลภาครัฐและเอกสารกฎหมาย</h2>
                 <p>เลือกบริการที่คุณต้องการทำรายการในรูปแบบออนไลน์ ไร้กระดาษ</p>
+                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 8px 16px; border-radius: 30px; margin-top: 15px; font-size: 13px; color: #10b981; font-weight: 500;">
+                    <i class="fa-solid fa-shield-heart fa-bounce"></i>
+                    <span>รับประกันเวลา SLA: ทำรายการช้าเกินกำหนด ยินดีคืนเงินเต็มจำนวน 100% (100% Refund Guaranteed)</span>
+                </div>
             </div>
 
             <!-- Filter Tags & Search bar -->
@@ -323,8 +335,8 @@
                     </div>
                     <div class="step-item">
                         <div class="step-number">3</div>
-                        <h4>บันทึกบัญชีอัตโนมัติ</h4>
-                        <p>ระบบเชื่อม FlowAccount API สร้างอินวอยซ์และใบรับเงินส่งตรงไปให้คุณทันที</p>
+                        <h4>รับใบยืนยันทันที</h4>
+                        <p>รับอีเมลยืนยันการชำระเงินพร้อมรายละเอียด SLA และนโยบายคืนเงินทันที</p>
                     </div>
                     <div class="step-item">
                         <div class="step-number">4</div>
@@ -417,6 +429,16 @@
                         <p class="form-help-text">เอกสารจะถูกส่งไปเก็บรักษาอย่างปลอดภัยที่ Supabase Vault</p>
                         <input type="file" id="wizard-file-upload" class="form-control" accept="image/*,application/pdf">
                         <div id="file-upload-status" style="margin-top:5px; font-size:13px; font-weight:500;"></div>
+                    </div>
+
+                    <!-- SLA & Refund Guarantee Card -->
+                    <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 15px; margin-top: 25px; font-size: 13px; color: var(--text-light); line-height: 1.45;">
+                        <strong style="color: #10b981; display: flex; align-items: center; gap: 6px; font-size: 14px;">
+                            <i class="fa-solid fa-shield-halved"></i> รับประกันเวลาดำเนินการ SLA & คืนเงินเต็มจำนวน 100%
+                        </strong>
+                        <p style="margin: 6px 0 0 0; font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+                            หากเจ้าหน้าที่ไม่สามารถยื่นเอกสารให้กับระบบภาครัฐสำเร็จภายในวันเวลาทำการที่สัญญาของบริการนี้ (อ้างอิงจาก SLA รายบริการ ไม่นับเสาร์-อาทิตย์ และวันหยุดนักขัตฤกษ์) ท่านมีสิทธิ์ขอรับเงินคืนเต็มจำนวน 100% (100% Full Refund Guaranteed) โดยไม่มีเงื่อนไขซ่อนเร้น
+                        </p>
                     </div>
 
                     <!-- Submit Actions -->
@@ -620,6 +642,12 @@
                 <button class="btn btn-primary btn-block btn-lg" style="margin-top:20px;" onclick="executePayment()">
                     <i class="fa-solid fa-lock"></i> ชำระเงินสุทธิอย่างปลอดภัย (Stripe Dynamic)
                 </button>
+                <div style="display:flex; justify-content:center; gap:12px; margin-top:15px; align-items:center; opacity:0.8;">
+                    <img src="/stripe-trust.jpg" alt="Stripe Partner" style="height:18px; border-radius: 2px;">
+                    <img src="/promptpay-trust.png" alt="PromptPay" style="height:16px; border-radius: 2px;">
+                    <img src="/pdpa-trust.png" alt="PDPA" style="height:22px;">
+                    <img src="/moneyback-trust.png" alt="Moneyback Guarantee" style="height:26px;">
+                </div>
             </div>
         </div>
     </div>
@@ -663,6 +691,7 @@
                             <button class="admin-tab-btn active" onclick="switchAdminTab('orders-tab')"><i class="fa-solid fa-gavel"></i> ตรวจสอบเอกสารราชการ</button>
                             <button class="admin-tab-btn" onclick="switchAdminTab('purchased-services-tab')"><i class="fa-solid fa-box-archive"></i> จัดการบริการลูกค้า</button>
                             <button class="admin-tab-btn" onclick="switchAdminTab('users-tab')"><i class="fa-solid fa-users"></i> ทะเบียนบัญชีลูกค้า</button>
+                            <button class="admin-tab-btn" onclick="switchAdminTab('cms-services-tab')"><i class="fa-solid fa-tags"></i> ตั้งค่าบริการ / CMS</button>
                             <button class="admin-tab-btn" onclick="switchAdminTab('settings-tab')"><i class="fa-solid fa-sliders"></i> ตั้งค่าเชื่อมต่อ SaaS</button>
                         </div>
                         
@@ -685,7 +714,7 @@
                                             <th>ชื่อลูกค้า</th>
                                             <th>ประเภทบริการ</th>
                                             <th>สถานะยอดเงิน</th>
-                                            <th>การเชื่อม FlowAccount</th>
+
                                             <th>สถานะคำขอภาครัฐ</th>
                                             <th>การดำเนินงาน (Actions)</th>
                                         </tr>
@@ -755,6 +784,60 @@
                             </div>
                         </div>
 
+                        <!-- Tab Content 2.5: CMS Services -->
+                        <div id="admin-tab-cms-services-tab" class="admin-tab-content hidden">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                                <h3 style="margin: 0;"><i class="fa-solid fa-tags text-primary"></i> ตั้งค่าบริการและค่าธรรมเนียม (Services CMS)</h3>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <select id="cms-category-filter" onchange="filterCmsServices()" class="form-control" style="width: 180px; font-size: 13px; margin: 0; padding: 6px 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px;">
+                                        <option value="">ทั้งหมด (All Categories)</option>
+                                    </select>
+                                    <input type="text" id="cms-search-input" onkeyup="filterCmsServices()" placeholder="ค้นหาบริการ..." class="form-control" style="width: 200px; font-size: 13px; margin: 0; padding: 6px 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px;">
+                                </div>
+                            </div>
+                            <p class="text-muted" style="font-size: 13px; margin-bottom: 20px;">จัดการข้อมูลบริการของ eDocman เช่น อัตราค่าบริการ ชื่อภาษาไทย และคำอธิบาย เพื่อแสดงผลต่อลูกค้าและคำนวณราคาชำระเงินเมื่อลูกค้าทำการจองบริการ</p>
+                            
+                            <div class="admin-orders-table-wrapper" style="margin-bottom: 30px;">
+                                <table class="table" id="cms-services-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 250px;">ชื่อบริการ (Title)</th>
+                                            <th>รหัสบริการ (Service Type)</th>
+                                            <th>หมวดหมู่ (Category)</th>
+                                            <th style="width: 320px;">รายละเอียด (Description)</th>
+                                            <th>SLA (วันทำการ)</th>
+                                            <th>ราคา (THB)</th>
+                                            <th>การจัดการ (Action)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cms-services-tbody">
+                                        <tr><td colspan="7" style="text-align:center;" class="text-muted">กำลังโหลดข้อมูล...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <hr style="border:0; border-top: 1px solid var(--border-color); margin: 30px 0;">
+
+                            <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-clock-rotate-left text-warning"></i> ประวัติการปรับปรุงราคาและบริการ (ย้อนหลัง 6 เดือน)</h3>
+                            <p class="text-muted" style="font-size: 13px; margin-bottom: 20px;">ประวัติการเปลี่ยนแปลงข้อมูลและราคาของค่าบริการทุกรายการ เพื่อความโปร่งใสในการปรับแก้อัตราค่าธรรมเนียมและข้อมูล CMS</p>
+                            
+                            <div class="admin-orders-table-wrapper">
+                                <table class="table" id="cms-history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>วัน-เวลาที่แก้ไข (Date)</th>
+                                            <th>บริการ (Service)</th>
+                                            <th>การเปลี่ยนแปลงที่เกิดขึ้น (Changes)</th>
+                                            <th>ผู้ปรับปรุง (By)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cms-history-tbody">
+                                        <tr><td colspan="4" style="text-align:center;" class="text-muted">ไม่มีประวัติการแก้ไขข้อมูลล่าสุด</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                         <!-- Tab Content 3: Settings -->
                         <div id="admin-tab-settings-tab" class="admin-tab-content hidden">
                             <h3>การจำลองการทำงานระบบภายนอก (Simulation Config)</h3>
@@ -797,19 +880,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
-                                    <div class="row-flex">
-                                        <div>
-                                            <strong>FlowAccount Accounting API</strong>
-                                            <p class="form-help-text" style="margin:0;">สร้างใบส่งของ/ใบเสร็จภาษีแบบจำลองและเก็บบันทึก Audit JSON</p>
-                                        </div>
-                                        <label class="switch">
-                                            <input type="checkbox" id="sim-toggle-flowaccount" onchange="toggleSimSetting('flowaccount', this.checked)">
-                                            <span class="slider round"></span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
+
 
                             <!-- Resend Live Email Sandbox Test Card -->
                             <div class="card bg-dark" style="margin-top: 25px; padding: 25px; border: 1px solid var(--primary);">
@@ -822,23 +893,7 @@
                             </div>
                         </div>
 
-                        <!-- Shared FlowAccount Sync details panel inside Right Workspace -->
-                        <div class="card" style="margin-top:20px; background: rgba(15,23,42,0.4);" id="flowaccount-audit-card">
-                            <h3><i class="fa-solid fa-receipt text-success"></i> บันทึกการเชื่อมต่อบัญชี FlowAccount API Audit Log</h3>
-                            <p class="text-muted">คลิกปุ่ม "Synced (Audit)" ในแถวคำร้องเพื่อเปิดตรวจสอบ JSON Request/Response แบบเรียลไทม์</p>
-                            <div id="flowaccount-log-details" class="hidden">
-                                <div class="row-flex font-mono bg-dark-code">
-                                    <div style="flex:1; padding:10px;">
-                                        <strong>JSON Request Sent to FlowAccount</strong>
-                                        <pre id="fa-log-request"></pre>
-                                    </div>
-                                    <div style="flex:1; padding:10px; border-left: 1px solid #334155;">
-                                        <strong>JSON Response Received</strong>
-                                        <pre id="fa-log-response"></pre>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
                     </main>
                 </div>
             </div>
@@ -908,6 +963,50 @@
                     <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:20px;">
                         <i class="fa-solid fa-save"></i> บันทึกข้อมูลและสร้างบัญชี
                     </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT SERVICE MODAL -->
+    <div id="edit-service-modal" class="modal-overlay hidden">
+        <div class="modal-card max-width-600">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square text-primary"></i> แก้ไขข้อมูลบริการและค่าธรรมเนียม</h3>
+                <button class="btn-close" onclick="closeEditServiceModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-service-form" onsubmit="handleEditServiceSubmit(event)">
+                    <input type="hidden" id="edit-service-type">
+                    <div class="form-group">
+                        <label>ชื่อบริการ (ภาษาไทย)</label>
+                        <input type="text" id="edit-service-name" class="form-control" required placeholder="ชื่อภาษาไทยสำหรับแสดงผล">
+                    </div>
+                    <div class="form-group">
+                        <label>หมวดหมู่บริการ (Category)</label>
+                        <input type="text" id="edit-service-category" class="form-control" list="category-datalist" required placeholder="เช่น จดทะเบียนธุรกิจ, ภาษีและบัญชี">
+                        <datalist id="category-datalist">
+                            <!-- Populated dynamically -->
+                        </datalist>
+                    </div>
+                    <div class="form-group">
+                        <label>อัตราค่าบริการ (THB)</label>
+                        <input type="number" id="edit-service-price" class="form-control" step="0.01" min="0" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>ข้อกำหนดเวลาดำเนินการ (SLA - วันทำการ)</label>
+                        <input type="number" id="edit-service-sla" class="form-control" min="1" required placeholder="5">
+                    </div>
+                    <div class="form-group">
+                        <label>รายละเอียดของบริการ (Content Description)</label>
+                        <textarea id="edit-service-content" class="form-control" rows="5" required placeholder="รายละเอียดหรือขอบเขตงาน..."></textarea>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <button type="button" class="btn btn-outline" style="flex:1;" onclick="closeEditServiceModal()">ยกเลิก (Cancel)</button>
+                        <button type="submit" class="btn btn-primary" style="flex:1;">
+                            <i class="fa-solid fa-save"></i> บันทึกการแก้ไข (Save)
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -1071,7 +1170,7 @@
                     <li><i class="fa-solid fa-check text-success"></i> <strong>ข้อมูลระบุตัวตน:</strong> สำเนาบัตรประชาชน, เลขประจำตัวผู้เสียภาษี เพื่อใช้กรอกแบบฟอร์ม DBD และประกันภัย พ.ร.บ.</li>
                     <li><i class="fa-solid fa-check text-success"></i> <strong>ข้อมูลทรัพย์สิน:</strong> รหัสทะเบียนบ้าน, ทะเบียนรถยนต์ เพื่อทำรายการยื่นภาษีและจดทะเบียนสิทธิ</li>
                     <li><i class="fa-solid fa-check text-success"></i> <strong>การจัดเก็บไฟล์:</strong> รูปถ่ายและเอกสารแนบจะถูกอัปโหลดขึ้น Supabase Database Vault ภายใต้การเข้ารหัสแบบปลอดภัย</li>
-                    <li><i class="fa-solid fa-check text-success"></i> <strong>การส่งต่อบัญชี:</strong> ชื่อและรายละเอียดธุรกรรมจะเชื่อมต่อกับ FlowAccount App เพื่อออกใบเสร็จภาษีถูกต้องตามกฎหมาย</li>
+
                 </ul>
                 <div class="pdpa-actions">
                     <button class="btn btn-outline" onclick="togglePdpaModal()">ปิดหน้านี้</button>
