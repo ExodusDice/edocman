@@ -1646,6 +1646,55 @@ function populateProfileFields() {
     document.getElementById('profile-old-password').value = '';
     document.getElementById('profile-new-password').value = '';
     document.getElementById('profile-confirm-password').value = '';
+
+    // Load Purchased Orders list
+    const tbody = document.getElementById('profile-orders-tbody');
+    if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">กำลังโหลดประวัติ...</td></tr>';
+        
+        fetch('/api/orders', {
+            headers: { 'Authorization': 'Bearer ' + currentToken }
+        })
+        .then(res => res.json())
+        .then(orders => {
+            const purchasedOrders = orders.filter(o => o.status === 'PAID' || o.status === 'PROCESSING' || o.status === 'COMPLETED');
+            if (purchasedOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">ไม่พบประวัติรายการสั่งซื้อที่ชำระเงินแล้ว</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            purchasedOrders.reverse().forEach(o => {
+                let statusBadge = '';
+                if (o.status === 'PAID') statusBadge = '<span class="badge badge-primary">ชำระเงินแล้ว</span>';
+                else if (o.status === 'PROCESSING') statusBadge = '<span class="badge badge-primary">กำลังตรวจสอบ</span>';
+                else if (o.status === 'COMPLETED') statusBadge = '<span class="badge badge-success">เสร็จสมบูรณ์</span>';
+                
+                let serviceName = translateServiceType(o.serviceType);
+                let actionLink = '';
+                if (o.status === 'COMPLETED' && o.officialDocumentUrl) {
+                    actionLink = `<a href="${o.officialDocumentUrl}" target="_blank" style="color: var(--success); text-decoration: none; font-weight: 500;"><i class="fa-solid fa-download"></i> ผลอนุมัติ</a>`;
+                } else {
+                    actionLink = `<a href="/api/orders/${o.id}/document/print" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 500;"><i class="fa-solid fa-print"></i> เอกสารคำร้อง</a>`;
+                }
+                
+                tbody.innerHTML += `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 12px 5px; font-weight: 600;">#${o.id}</td>
+                        <td style="padding: 12px 5px;">${new Date(o.createdAt).toLocaleDateString('th-TH')}</td>
+                        <td style="padding: 12px 5px; font-weight: 500;">${serviceName}</td>
+                        <td style="padding: 12px 5px; font-weight: 600; color: var(--primary);">${o.price.toLocaleString('th-TH')} ฿</td>
+                        <td style="padding: 12px 5px;">${statusBadge}</td>
+                        <td style="padding: 12px 5px;">${actionLink}</td>
+                    </tr>
+                `;
+            });
+        })
+        .catch(err => {
+            console.error("Error fetching profile order history:", err);
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--danger);">ล้มเหลวในการเชื่อมต่อระบบดึงประวัติ</td></tr>';
+        });
+    }
 }
 
 function handleProfileUpdate(e) {

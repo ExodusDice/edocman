@@ -509,6 +509,30 @@
                         </button>
                     </div>
                 </form>
+
+                <!-- Order Purchase History -->
+                <div style="margin: 35px 0 15px 0; border-top: 1px solid var(--border-color); padding-top: 25px;">
+                    <h3 style="font-size: 16px; margin-bottom: 15px; color: var(--text-light);"><i class="fa-solid fa-receipt"></i> ประวัติรายการสั่งซื้อที่ชำระเงินแล้ว / Order Purchase History</h3>
+                    <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                        <table class="table" style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
+                                    <th style="padding: 10px 5px; color: var(--text-muted); font-weight: 500;">เลขที่คำขอ / ID</th>
+                                    <th style="padding: 10px 5px; color: var(--text-muted); font-weight: 500;">วันที่ทำรายการ / Date</th>
+                                    <th style="padding: 10px 5px; color: var(--text-muted); font-weight: 500;">บริการ / Service</th>
+                                    <th style="padding: 10px 5px; color: var(--text-muted); font-weight: 500;">จำนวนเงิน / Price</th>
+                                    <th style="padding: 10px 5px; color: var(--text-muted); font-weight: 500;">สถานะ / Status</th>
+                                    <th style="padding: 10px 5px; color: var(--text-muted); font-weight: 500;">เอกสาร / Link</th>
+                                </tr>
+                            </thead>
+                            <tbody id="profile-orders-tbody">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 25px; color: var(--text-muted);">กำลังเรียกดูประวัติการทำรายการธุรกรรมของคุณ...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
