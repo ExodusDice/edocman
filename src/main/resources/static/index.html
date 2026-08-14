@@ -49,8 +49,8 @@
                         <i class="fa-solid fa-user"></i> เข้าสู่ระบบ / สมัครสมาชิก
                     </button>
                 </div>
-                <div id="user-profile-container" class="hidden">
-                    <span id="user-display-name">-</span>
+                <div id="user-profile-container" class="hidden" style="display: flex; align-items: center; gap: 15px;">
+                    <a href="#" id="user-display-name" onclick="showSection('profile')" style="color: var(--primary); font-weight: 500; text-decoration: none;"><i class="fa-solid fa-circle-user"></i> -</a>
                     <button class="btn btn-sm btn-danger" onclick="executeLogout()">ออกจากระบบ</button>
                 </div>
             </div>
@@ -365,6 +365,11 @@
                         <li><a href="#" onclick="showWizard('company-director-change')"><i class="fa-solid fa-user-gear"></i> เปลี่ยนตัวกรรมการ (เจ้าของ)</a></li>
                         <li><a href="#" onclick="showWizard('shareholder-update')"><i class="fa-solid fa-users-viewfinder"></i> แก้ไขรายชื่อผู้ถือหุ้น (บอจ.5)</a></li>
                     </ul>
+
+                    <h4 style="margin: 15px 0 5px 0; font-size: 13px; color: var(--primary); text-transform: uppercase;"><i class="fa-solid fa-user-shield"></i> Account / บัญชีผู้ใช้</h4>
+                    <ul class="sidebar-menu">
+                        <li><a href="#" onclick="showSection('profile')"><i class="fa-solid fa-id-card"></i> จัดการโปรไฟล์ผู้ใช้งาน</a></li>
+                    </ul>
                 </div>
             </div>
 
@@ -414,6 +419,93 @@
                     <div class="form-actions" style="margin-top:30px;">
                         <button type="submit" class="btn btn-primary btn-block btn-lg">
                             <i class="fa-solid fa-paper-plane"></i> ยืนยันข้อมูลคำขอและชำระค่าบริการ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3.5: User Profile Page -->
+    <section id="profile-section" class="app-section hidden">
+        <div class="container max-width-700">
+            <div class="card card-premium">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <span style="font-size: 32px; color: var(--primary);"><i class="fa-solid fa-id-card"></i></span>
+                    <div>
+                        <h2 style="margin: 0; font-size: 22px; color: var(--text-light);">โปรไฟล์ผู้ใช้งาน / User Profile</h2>
+                        <p style="margin: 5px 0 0 0; font-size: 13px; color: var(--text-muted);">จัดการข้อมูลส่วนตัว ความปลอดภัย และสิทธิตามกฎหมายคุ้มครองข้อมูล</p>
+                    </div>
+                </div>
+
+                <form id="profile-update-form" onsubmit="handleProfileUpdate(event)">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="color: var(--text-light); font-weight: 500; margin-bottom: 5px; display: block;">ชื่อ-นามสกุล / Full Name</label>
+                        <input type="text" id="profile-fullname" class="form-control" required placeholder="นายสมศักดิ์ รักดี">
+                    </div>
+
+                    <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label style="color: var(--text-light); font-weight: 500; margin-bottom: 5px; display: block;">อีเมล / Email Address (แก้ไขไม่ได้)</label>
+                            <input type="text" id="profile-email" class="form-control" readonly style="background-color: rgba(255,255,255,0.05); color: var(--text-muted); cursor: not-allowed;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label style="color: var(--text-light); font-weight: 500; margin-bottom: 5px; display: block;">เบอร์โทรศัพท์ / Phone Number</label>
+                            <input type="text" id="profile-phone" class="form-control" required placeholder="089xxxxxxx">
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label style="color: var(--text-light); font-weight: 500; margin-bottom: 5px; display: block;">สิทธิ์การเข้าถึง / Account Role</label>
+                            <input type="text" id="profile-role" class="form-control" readonly style="background-color: rgba(255,255,255,0.05); color: var(--text-muted); cursor: not-allowed;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label style="color: var(--text-light); font-weight: 500; margin-bottom: 5px; display: block;">สถานะ PDPA Consent</label>
+                            <div style="padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 6px; font-size: 12px; color: var(--success); font-weight: 500; height: calc(100% - 25px); display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-shield-halved"></i> ยินยอมแล้วที่ <span id="profile-pdpa-date">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin: 25px 0 15px 0; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                        <h3 style="font-size: 16px; margin-bottom: 15px; color: var(--text-light);"><i class="fa-solid fa-lock"></i> เปลี่ยนรหัสผ่าน / Update Password (เว้นว่างไว้หากไม่ต้องการเปลี่ยน)</h3>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="color: var(--text-light); font-weight: 500; margin-bottom: 5px; display: block;">รหัสผ่านปัจจุบัน / Current Password</label>
+                        <input type="password" id="profile-old-password" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label style="color: var(--text-light); font-weight: 500; margin-bottom: 5px; display: block;">รหัสผ่านใหม่ / New Password</label>
+                            <input type="password" id="profile-new-password" class="form-control" placeholder="••••••••">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label style="color: var(--text-light); font-weight: 500; margin-bottom: 5px; display: block;">ยืนยันรหัสผ่านใหม่ / Confirm New Password</label>
+                            <input type="password" id="profile-confirm-password" class="form-control" placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <div style="margin: 20px 0; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="font-size: 14px; display: block; color: var(--text-light);"><i class="fa-solid fa-key"></i> เปิดใช้งานล็อกอิน 2FA (Two-Factor Verification)</strong>
+                                <span style="font-size: 11px; color: var(--text-muted);">เมื่อเปิดใช้งาน ทุกการล็อกอินจะต้องระบุรหัส OTP 6 หลักที่ส่งไปทางอีเมล</span>
+                            </div>
+                            <label class="switch-container" style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                                <input type="checkbox" id="profile-2fa-toggle" style="opacity: 0; width: 0; height: 0;">
+                                <span class="switch-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .4s; border-radius: 24px;"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-top: 30px;">
+                        <button type="submit" class="btn btn-primary btn-block btn-lg" style="flex: 1.2;">
+                            <i class="fa-solid fa-floppy-disk"></i> บันทึกการเปลี่ยนแปลง
+                        </button>
+                        <button type="button" class="btn btn-outline btn-block btn-lg" style="flex: 0.8; margin-top: 0;" onclick="showSection('dashboard')">
+                            ยกเลิก
                         </button>
                     </div>
                 </form>

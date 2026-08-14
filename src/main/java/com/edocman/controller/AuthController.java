@@ -322,6 +322,49 @@ public class AuthController {
         return ResponseEntity.ok(user.get());
     }
 
+    @PostMapping("/update-profile")
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, Object> payload) {
+        String email = (String) payload.get("email");
+        String fullName = (String) payload.get("fullName");
+        String phone = (String) payload.get("phone");
+        Boolean twoFactorEnabled = (Boolean) payload.get("twoFactorEnabled");
+        String oldPassword = (String) payload.get("oldPassword");
+        String newPassword = (String) payload.get("newPassword");
+
+        if (email == null) {
+            return ResponseEntity.badRequest().body("{\"error\": \"Email is required\"}");
+        }
+
+        Optional<User> userOpt = userRepository.findAll().stream()
+                .filter(u -> u.getEmail().equalsIgnoreCase(email.trim()))
+                .findFirst();
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = userOpt.get();
+        if (fullName != null) user.setFullName(fullName);
+        if (phone != null) user.setPhone(phone);
+        if (twoFactorEnabled != null) user.setTwoFactorEnabled(twoFactorEnabled);
+
+        // Password update check
+        if (newPassword != null && !newPassword.trim().isEmpty()) {
+            String hashedOld = hashPassword(oldPassword);
+            if (user.getPassword() != null && !user.getPassword().equals(hashedOld)) {
+                return ResponseEntity.badRequest().body("{\"error\": \"รหัสผ่านเดิมไม่ถูกต้อง / Incorrect old password\"}");
+            }
+            user.setPassword(hashPassword(newPassword.trim()));
+        }
+
+        userRepository.save(user);
+        
+        // Clear password hash
+        User responseUser = user;
+        responseUser.setPassword(null);
+        return ResponseEntity.ok(responseUser);
+    }
+
     private String hashPassword(String password) {
         if (password == null) return null;
         try {
