@@ -645,183 +645,192 @@
 
             <!-- 5b. Admin Dashboard Console (Shown when admin logged in) -->
             <div id="admin-dashboard-panel" class="hidden">
-                <div class="card card-premium">
-                    <div class="card-header-flex">
-                        <h2><i class="fa-solid fa-gears text-primary"></i> eDocman Administration Console</h2>
-                        <div>
-                            <span class="badge badge-success">Logged in as SuperAdmin (sadminwa)</span>
-                            <button class="btn btn-danger btn-sm" onclick="executeLogout()" style="margin-left:10px;">ออกจากระบบแอดมิน</button>
+                <div class="card card-premium" style="padding: 0; display: flex; flex-direction: row; border: 1px solid var(--border-color); background: rgba(15, 23, 42, 0.4); min-height: 750px; border-radius: 12px; overflow: hidden; max-width: 1300px; margin: 0 auto;">
+                    <!-- LEFT SIDEBAR NAVIGATION (FinCommerce Style) -->
+                    <aside style="width: 280px; background: rgba(15, 23, 42, 0.95); border-right: 1px solid var(--border-color); padding: 25px; display: flex; flex-direction: column; gap: 25px; flex-shrink: 0;">
+                        <div class="sidebar-logo">
+                            <h1 style="margin: 0; font-size: 20px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-gears text-primary"></i> eDocman
+                            </h1>
+                            <span style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--primary); font-weight: 700; display: block; margin-top: 5px;">SaaS Admin Console</span>
                         </div>
-                    </div>
-                    
-                    <!-- Admin Navigation Tabs -->
-                    <div class="admin-tabs">
-                        <button class="admin-tab-btn active" onclick="switchAdminTab('orders-tab')"><i class="fa-solid fa-gavel"></i> ตรวจสอบเอกสารราชการ</button>
-                        <button class="admin-tab-btn" onclick="switchAdminTab('purchased-services-tab')"><i class="fa-solid fa-box-archive"></i> จัดการบริการลูกค้า (Purchased Services)</button>
-                        <button class="admin-tab-btn" onclick="switchAdminTab('users-tab')"><i class="fa-solid fa-users"></i> ทะเบียนบัญชีลูกค้า</button>
-                        <button class="admin-tab-btn" onclick="switchAdminTab('settings-tab')"><i class="fa-solid fa-sliders"></i> ตั้งค่าเชื่อมต่อ SaaS (Mock/Live)</button>
-                    </div>
-
-                    <!-- TAB 1: Government orders approval list -->
-                    <div id="admin-tab-orders-tab" class="admin-tab-content">
-                        <h3>รายการส่งเอกสารภาครัฐทั้งหมด</h3>
-                        <div class="admin-orders-table-wrapper">
-                            <table class="table" id="admin-orders-table">
-                                <thead>
-                                    <tr>
-                                        <th>OrderID</th>
-                                        <th>ชื่อลูกค้า</th>
-                                        <th>ประเภทบริการ</th>
-                                        <th>สถานะยอดเงิน</th>
-                                        <th>การเชื่อม FlowAccount</th>
-                                        <th>สถานะคำขอภาครัฐ</th>
-                                        <th>การดำเนินงาน (Actions)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-orders-tbody">
-                                    <!-- Populated dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- TAB 1.5: Purchased Services panel -->
-                    <div id="admin-tab-purchased-services-tab" class="admin-tab-content hidden">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                            <h3 style="margin: 0;"><i class="fa-solid fa-box-archive text-warning"></i> บริการที่ชำระเงินแล้วของลูกค้า (Paid Purchased Services)</h3>
-                            <div>
-                                <input type="text" id="purchased-search-input" onkeyup="filterPurchasedServices()" placeholder="ค้นหาตามไอดี หรือบริการ..." class="form-control" style="width: 250px; font-size: 13px; margin: 0; padding: 6px 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px;">
-                            </div>
-                        </div>
-                        <p class="text-muted" style="font-size: 13px; margin-bottom: 20px;">แสดงเฉพาะบริการคำสั่งซื้อที่มีการชำระเงินเรียบร้อยแล้ว (สถานะ PAID, PROCESSING, COMPLETED) แอดมินสามารถอัปเดตความคืบหน้า หรืออัปโหลดเอกสารราชการที่เสร็จสมบูรณ์ได้จากที่นี่</p>
-                        <div class="admin-orders-table-wrapper">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>OrderID</th>
-                                        <th>ชื่อลูกค้า / อีเมล</th>
-                                        <th>บริการที่ซื้อ</th>
-                                        <th>ราคา (THB)</th>
-                                        <th>ความคืบหน้าคำขอ</th>
-                                        <th>เอกสารอนุมัติราชการ</th>
-                                        <th>การจัดการ (Actions)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-purchased-services-tbody">
-                                    <!-- Populated dynamically -->
-                                    <tr><td colspan="7" style="text-align:center;" class="text-muted">กำลังโหลดข้อมูล...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- TAB 2: Customer list panel -->
-                    <div id="admin-tab-users-tab" class="admin-tab-content hidden">
-                        <h3>รายชื่อลูกค้าที่ลงทะเบียนในระบบ</h3>
-                        <div class="admin-orders-table-wrapper">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Clerk User ID</th>
-                                        <th>ชื่อ-นามสกุล</th>
-                                        <th>อีเมล</th>
-                                        <th>เบอร์โทรศัพท์</th>
-                                        <th>PDPA Consent</th>
-                                        <th>วันที่ยินยอม (PDPA)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-users-tbody">
-                                    <!-- Populated dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- TAB 3: SaaS live settings simulator switches -->
-                    <div id="admin-tab-settings-tab" class="admin-tab-content hidden">
-                        <h3>การจำลองการทำงานระบบภายนอก (Simulation Config)</h3>
-                        <p class="text-muted">สลับเปิด/ปิด เพื่อเปิดใช้งานจำลอง (Simulation Mode) หรือเรียกใช้งานคีย์ API จริงผ่าน Properties</p>
                         
-                        <div class="settings-grid-switches" style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-                            <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
-                                <div class="row-flex">
-                                    <div>
-                                        <strong>Stripe Payment Gateway</strong>
-                                        <p class="form-help-text" style="margin:0;">จำลองความสำเร็จของบัตร/PromptPay โดยไม่ต้องใช้ Key จริง</p>
-                                    </div>
-                                    <label class="switch">
-                                        <input type="checkbox" id="sim-toggle-stripe" onchange="toggleSimSetting('stripe', this.checked)">
-                                        <span class="slider round"></span>
-                                    </label>
+                        <div class="admin-tabs" style="display: flex; flex-direction: column; gap: 6px; margin: 10px 0; border: none; padding: 0;">
+                            <button class="admin-tab-btn active" onclick="switchAdminTab('orders-tab')"><i class="fa-solid fa-gavel"></i> ตรวจสอบเอกสารราชการ</button>
+                            <button class="admin-tab-btn" onclick="switchAdminTab('purchased-services-tab')"><i class="fa-solid fa-box-archive"></i> จัดการบริการลูกค้า</button>
+                            <button class="admin-tab-btn" onclick="switchAdminTab('users-tab')"><i class="fa-solid fa-users"></i> ทะเบียนบัญชีลูกค้า</button>
+                            <button class="admin-tab-btn" onclick="switchAdminTab('settings-tab')"><i class="fa-solid fa-sliders"></i> ตั้งค่าเชื่อมต่อ SaaS</button>
+                        </div>
+                        
+                        <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+                            <span class="badge badge-success" style="font-size: 10px; padding: 6px 10px; text-align: center; display: block; border-radius: 4px; font-family: monospace;">Admin: sadminwa</span>
+                            <button class="btn btn-danger btn-sm btn-block" onclick="executeLogout()" style="margin: 0; padding: 8px; font-size: 12px;"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</button>
+                        </div>
+                    </aside>
+
+                    <!-- RIGHT MAIN WORKSPACE -->
+                    <main style="flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px;">
+                        <!-- Tab Content 1: Orders -->
+                        <div id="admin-tab-orders-tab" class="admin-tab-content">
+                            <h3>รายการส่งเอกสารภาครัฐทั้งหมด</h3>
+                            <div class="admin-orders-table-wrapper">
+                                <table class="table" id="admin-orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th>OrderID</th>
+                                            <th>ชื่อลูกค้า</th>
+                                            <th>ประเภทบริการ</th>
+                                            <th>สถานะยอดเงิน</th>
+                                            <th>การเชื่อม FlowAccount</th>
+                                            <th>สถานะคำขอภาครัฐ</th>
+                                            <th>การดำเนินงาน (Actions)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-orders-tbody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tab Content 1.5: Purchased Services -->
+                        <div id="admin-tab-purchased-services-tab" class="admin-tab-content hidden">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                                <h3 style="margin: 0;"><i class="fa-solid fa-box-archive text-warning"></i> บริการที่ชำระเงินแล้วของลูกค้า (Paid Purchased Services)</h3>
+                                <div>
+                                    <input type="text" id="purchased-search-input" onkeyup="filterPurchasedServices()" placeholder="ค้นหาตามไอดี หรือบริการ..." class="form-control" style="width: 250px; font-size: 13px; margin: 0; padding: 6px 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px;">
                                 </div>
                             </div>
-                            <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
-                                <div class="row-flex">
-                                    <div>
-                                        <strong>Supabase File Storage</strong>
-                                        <p class="form-help-text" style="margin:0;">เก็บภาพบัตร/โฉนดไว้ในเครื่องโลคัลแทน bucket จริง</p>
+                            <p class="text-muted" style="font-size: 13px; margin-bottom: 20px;">แสดงเฉพาะบริการคำสั่งซื้อที่มีการชำระเงินเรียบร้อยแล้ว (สถานะ PAID, PROCESSING, COMPLETED) แอดมินสามารถอัปเดตความคืบหน้า หรืออัปโหลดเอกสารราชการที่เสร็จสมบูรณ์ได้จากที่นี่</p>
+                            <div class="admin-orders-table-wrapper">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>OrderID</th>
+                                            <th>ชื่อลูกค้า / อีเมล</th>
+                                            <th>บริการที่ซื้อ</th>
+                                            <th>ราคา (THB)</th>
+                                            <th>ความคืบหน้าคำขอ</th>
+                                            <th>เอกสารอนุมัติราชการ</th>
+                                            <th>การจัดการ (Actions)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-purchased-services-tbody">
+                                        <!-- Populated dynamically -->
+                                        <tr><td colspan="7" style="text-align:center;" class="text-muted">กำลังโหลดข้อมูล...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tab Content 2: Users -->
+                        <div id="admin-tab-users-tab" class="admin-tab-content hidden">
+                            <h3>รายชื่อลูกค้าที่ลงทะเบียนในระบบ</h3>
+                            <div class="admin-orders-table-wrapper">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Clerk User ID</th>
+                                            <th>ชื่อ-นามสกุล</th>
+                                            <th>อีเมล</th>
+                                            <th>เบอร์โทรศัพท์</th>
+                                            <th>PDPA Consent</th>
+                                            <th>วันที่ยินยอม (PDPA)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-users-tbody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tab Content 3: Settings -->
+                        <div id="admin-tab-settings-tab" class="admin-tab-content hidden">
+                            <h3>การจำลองการทำงานระบบภายนอก (Simulation Config)</h3>
+                            <p class="text-muted">สลับเปิด/ปิด เพื่อเปิดใช้งานจำลอง (Simulation Mode) หรือเรียกใช้งานคีย์ API จริงผ่าน Properties</p>
+                            
+                            <div class="settings-grid-switches" style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                                <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
+                                    <div class="row-flex">
+                                        <div>
+                                            <strong>Stripe Payment Gateway</strong>
+                                            <p class="form-help-text" style="margin:0;">จำลองความสำเร็จของบัตร/PromptPay โดยไม่ต้องใช้ Key จริง</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="sim-toggle-stripe" onchange="toggleSimSetting('stripe', this.checked)">
+                                            <span class="slider round"></span>
+                                        </label>
                                     </div>
-                                    <label class="switch">
-                                        <input type="checkbox" id="sim-toggle-supabase" onchange="toggleSimSetting('supabase', this.checked)">
-                                        <span class="slider round"></span>
-                                    </label>
+                                </div>
+                                <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
+                                    <div class="row-flex">
+                                        <div>
+                                            <strong>Supabase File Storage</strong>
+                                            <p class="form-help-text" style="margin:0;">เก็บภาพบัตร/โฉนดไว้ในเครื่องโลคัลแทน bucket จริง</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="sim-toggle-supabase" onchange="toggleSimSetting('supabase', this.checked)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
+                                    <div class="row-flex">
+                                        <div>
+                                            <strong>Resend Email Notifications</strong>
+                                            <p class="form-help-text" style="margin:0;">แสดงผลลัพธ์อีเมลในคอนโซลแทนการส่งจริงเข้าเมลบ็อกซ์</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="sim-toggle-resend" onchange="toggleSimSetting('resend', this.checked)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
+                                    <div class="row-flex">
+                                        <div>
+                                            <strong>FlowAccount Accounting API</strong>
+                                            <p class="form-help-text" style="margin:0;">สร้างใบส่งของ/ใบเสร็จภาษีแบบจำลองและเก็บบันทึก Audit JSON</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="sim-toggle-flowaccount" onchange="toggleSimSetting('flowaccount', this.checked)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
-                                <div class="row-flex">
-                                    <div>
-                                        <strong>Resend Email Notifications</strong>
-                                        <p class="form-help-text" style="margin:0;">แสดงผลลัพธ์อีเมลในคอนโซลแทนการส่งจริงเข้าเมลบ็อกซ์</p>
-                                    </div>
-                                    <label class="switch">
-                                        <input type="checkbox" id="sim-toggle-resend" onchange="toggleSimSetting('resend', this.checked)">
-                                        <span class="slider round"></span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="card bg-dark" style="padding:20px; border:1px solid #334155;">
-                                <div class="row-flex">
-                                    <div>
-                                        <strong>FlowAccount Accounting API</strong>
-                                        <p class="form-help-text" style="margin:0;">สร้างใบส่งของ/ใบเสร็จภาษีแบบจำลองและเก็บบันทึก Audit JSON</p>
-                                    </div>
-                                    <label class="switch">
-                                        <input type="checkbox" id="sim-toggle-flowaccount" onchange="toggleSimSetting('flowaccount', this.checked)">
-                                        <span class="slider round"></span>
-                                    </label>
+
+                            <!-- Resend Live Email Sandbox Test Card -->
+                            <div class="card bg-dark" style="margin-top: 25px; padding: 25px; border: 1px solid var(--primary);">
+                                <strong style="color: var(--text-light); font-size: 15px; display: block; margin-bottom: 5px;"><i class="fa-solid fa-envelope-open-text text-primary"></i> 📧 ทดสอบระบบส่งอีเมลจริงด้วย Resend (Live Email Sandbox Test)</strong>
+                                <p class="text-muted" style="font-size: 12px; margin: 0 0 15px 0; line-height: 1.4;">กรอกอีเมลปลายทางเพื่อส่งทดสอบ Use Cases ทั้งหมด 5 รูปแบบ (Welcome, Order Confirmation, Payment Success, Admin Approval และ 2FA OTP) ไปยังเมลบ็อกซ์ของคุณจริงผ่านทาง API Key</p>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <input type="email" id="test-email-target" class="form-control" value="frankminor@gmail.com" placeholder="กรอกอีเมลของคุณ..." style="flex: 1.5; min-width: 250px;">
+                                    <button type="button" class="btn btn-primary" onclick="sendTestEmails()" style="flex: 0.8; min-width: 150px;"><i class="fa-solid fa-paper-plane"></i> ส่งอีเมลทดสอบ</button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Resend Live Email Sandbox Test Card -->
-                        <div class="card bg-dark" style="margin-top: 25px; padding: 25px; border: 1px solid var(--primary);">
-                            <strong style="color: var(--text-light); font-size: 15px; display: block; margin-bottom: 5px;"><i class="fa-solid fa-envelope-open-text text-primary"></i> 📧 ทดสอบระบบส่งอีเมลจริงด้วย Resend (Live Email Sandbox Test)</strong>
-                            <p class="text-muted" style="font-size: 12px; margin: 0 0 15px 0; line-height: 1.4;">กรอกอีเมลปลายทางเพื่อส่งทดสอบ Use Cases ทั้งหมด 5 รูปแบบ (Welcome, Order Confirmation, Payment Success, Admin Approval และ 2FA OTP) ไปยังเมลบ็อกซ์ของคุณจริงผ่านทาง API Key</p>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <input type="email" id="test-email-target" class="form-control" value="frankminor@gmail.com" placeholder="กรอกอีเมลของคุณ..." style="flex: 1.5; min-width: 250px;">
-                                <button type="button" class="btn btn-primary" onclick="sendTestEmails()" style="flex: 0.8; min-width: 150px;"><i class="fa-solid fa-paper-plane"></i> ส่งอีเมลทดสอบ</button>
+                        <!-- Shared FlowAccount Sync details panel inside Right Workspace -->
+                        <div class="card" style="margin-top:20px; background: rgba(15,23,42,0.4);" id="flowaccount-audit-card">
+                            <h3><i class="fa-solid fa-receipt text-success"></i> บันทึกการเชื่อมต่อบัญชี FlowAccount API Audit Log</h3>
+                            <p class="text-muted">คลิกปุ่ม "Synced (Audit)" ในแถวคำร้องเพื่อเปิดตรวจสอบ JSON Request/Response แบบเรียลไทม์</p>
+                            <div id="flowaccount-log-details" class="hidden">
+                                <div class="row-flex font-mono bg-dark-code">
+                                    <div style="flex:1; padding:10px;">
+                                        <strong>JSON Request Sent to FlowAccount</strong>
+                                        <pre id="fa-log-request"></pre>
+                                    </div>
+                                    <div style="flex:1; padding:10px; border-left: 1px solid #334155;">
+                                        <strong>JSON Response Received</strong>
+                                        <pre id="fa-log-response"></pre>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Shared FlowAccount Sync details panel -->
-                <div class="card" style="margin-top:20px;" id="flowaccount-audit-card">
-                    <h3><i class="fa-solid fa-receipt text-success"></i> บันทึกการเชื่อมต่อบัญชี FlowAccount API Audit Log</h3>
-                    <p class="text-muted">คลิกปุ่ม "Synced (Audit)" ในแถวคำร้องเพื่อเปิดตรวจสอบ JSON Request/Response แบบเรียลไทม์</p>
-                    <div id="flowaccount-log-details" class="hidden">
-                        <div class="row-flex font-mono bg-dark-code">
-                            <div style="flex:1; padding:10px;">
-                                <strong>JSON Request Sent to FlowAccount</strong>
-                                <pre id="fa-log-request"></pre>
-                            </div>
-                            <div style="flex:1; padding:10px; border-left: 1px solid #334155;">
-                                <strong>JSON Response Received</strong>
-                                <pre id="fa-log-response"></pre>
-                            </div>
-                        </div>
-                    </div>
+                    </main>
                 </div>
             </div>
         </div>

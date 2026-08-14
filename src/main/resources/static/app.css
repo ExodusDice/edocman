@@ -848,32 +848,38 @@ p { margin-bottom: 1rem; font-weight: 300; line-height: 1.7; }
 
 .admin-tabs {
     display: flex;
-    gap: 10px;
-    margin: 20px 0;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 10px;
+    flex-direction: column;
+    gap: 6px;
+    margin: 10px 0;
 }
 .admin-tab-btn {
+    width: 100%;
     background: none;
     border: none;
     color: var(--text-muted);
     font-family: var(--font-prompt);
-    font-size: 14px;
-    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 16px;
+    text-align: left;
+    border-radius: 8px;
     cursor: pointer;
-    transition: var(--transition);
-    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.3s;
 }
 .admin-tab-btn:hover {
     color: #fff;
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: rgba(245, 158, 11, 0.08);
 }
 .admin-tab-btn.active {
-    color: #fff;
-    background-color: var(--primary);
+    color: #fff !important;
+    background-color: rgba(245, 158, 11, 0.15) !important;
+    box-shadow: inset 3px 0 0 var(--primary);
 }
 .admin-tab-content {
-    padding: 15px 0;
+    padding: 10px 0;
 }
 
 .switch {
