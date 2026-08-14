@@ -47,30 +47,75 @@ public class PaymentController {
             return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
         }
 
-        Long orderId = Long.valueOf(request.get("orderId").toString());
-        Optional<LegalServiceOrder> orderOpt = orderRepository.findById(orderId);
-
-        if (orderOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        LegalServiceOrder order = orderOpt.get();
-        if (!order.getClerkUserId().equals(clerkUserId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"error\": \"Access denied\"}");
-        }
-
-        try {
-            Map<String, Object> paymentData = stripePaymentService.createPaymentIntent(
-                    order.getPrice(), order.getCurrency(), order.getId().toString());
+        if (request.containsKey("orderIds")) {
+            java.util.List<?> idsObj = (java.util.List<?>) request.get("orderIds");
+            if (idsObj == null || idsObj.isEmpty()) {
+                return ResponseEntity.badRequest().body("{\"error\": \"No orderIds provided\"}");
+            }
             
-            order.setStripePaymentIntentId((String) paymentData.get("id"));
-            order.setStripePaymentStatus("intent_created");
-            order.setStatus(LegalServiceOrder.OrderStatus.PENDING_PAYMENT);
-            orderRepository.save(order);
+            java.math.BigDecimal totalAmount = java.math.BigDecimal.ZERO;
+            java.util.List<LegalServiceOrder> orders = new java.util.ArrayList<>();
+            StringBuilder sb = new StringBuilder();
 
-            return ResponseEntity.ok(paymentData);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("{\"error\": \"" + e.getMessage() + "\"}");
+            for (Object idObj : idsObj) {
+                Long orderId = Long.valueOf(idObj.toString());
+                Optional<LegalServiceOrder> orderOpt = orderRepository.findById(orderId);
+                if (orderOpt.isEmpty()) {
+                    return ResponseEntity.notFound().build();
+                }
+                LegalServiceOrder order = orderOpt.get();
+                if (!order.getClerkUserId().equals(clerkUserId)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"error\": \"Access denied\"}");
+                }
+                totalAmount = totalAmount.add(order.getPrice());
+                orders.add(order);
+                if (sb.length() > 0) sb.append(",");
+                sb.append(orderId);
+            }
+
+            try {
+                String commaSeparatedIds = sb.toString();
+                Map<String, Object> paymentData = stripePaymentService.createPaymentIntent(
+                        totalAmount, "THB", commaSeparatedIds);
+                
+                String intentId = (String) paymentData.get("id");
+                for (LegalServiceOrder order : orders) {
+                    order.setStripePaymentIntentId(intentId);
+                    order.setStripePaymentStatus("intent_created");
+                    order.setStatus(LegalServiceOrder.OrderStatus.PENDING_PAYMENT);
+                    orderRepository.save(order);
+                }
+
+                return ResponseEntity.ok(paymentData);
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body("{\"error\": \"" + e.getMessage() + "\"}");
+            }
+        } else {
+            Long orderId = Long.valueOf(request.get("orderId").toString());
+            Optional<LegalServiceOrder> orderOpt = orderRepository.findById(orderId);
+
+            if (orderOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            LegalServiceOrder order = orderOpt.get();
+            if (!order.getClerkUserId().equals(clerkUserId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"error\": \"Access denied\"}");
+            }
+
+            try {
+                Map<String, Object> paymentData = stripePaymentService.createPaymentIntent(
+                        order.getPrice(), order.getCurrency(), order.getId().toString());
+                
+                order.setStripePaymentIntentId((String) paymentData.get("id"));
+                order.setStripePaymentStatus("intent_created");
+                order.setStatus(LegalServiceOrder.OrderStatus.PENDING_PAYMENT);
+                orderRepository.save(order);
+
+                return ResponseEntity.ok(paymentData);
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body("{\"error\": \"" + e.getMessage() + "\"}");
+            }
         }
     }
 
@@ -91,7 +136,14 @@ public class PaymentController {
                 if (paymentIntent != null) {
                     String orderIdStr = paymentIntent.getMetadata().get("orderId");
                     if (orderIdStr != null) {
-                        processSuccessfulPayment(Long.valueOf(orderIdStr), paymentIntent.getId(), paymentIntent.getStatus());
+                        if (orderIdStr.contains(",")) {
+                            String[] ids = orderIdStr.split(",");
+                            for (String id : ids) {
+                                processSuccessfulPayment(Long.valueOf(id.trim()), paymentIntent.getId(), paymentIntent.getStatus());
+                            }
+                        } else {
+                            processSuccessfulPayment(Long.valueOf(orderIdStr), paymentIntent.getId(), paymentIntent.getStatus());
+                        }
                     }
                 }
             }
@@ -105,20 +157,29 @@ public class PaymentController {
     /**
      * Endpoint to manually mock Stripe success for easy local/sandbox testing.
      */
-    @PostMapping("/{orderId}/simulate-success")
-    public ResponseEntity<?> simulateSuccess(@PathVariable Long orderId) {
-        Optional<LegalServiceOrder> orderOpt = orderRepository.findById(orderId);
-        if (orderOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+    @PostMapping("/{orderIdStr}/simulate-success")
+    public ResponseEntity<?> simulateSuccess(@PathVariable String orderIdStr) {
+        String[] idStrings = orderIdStr.split(",");
+        boolean anyProcessed = false;
+        String mockIntentId = "pi_mock_success";
+
+        for (String idStr : idStrings) {
+            Long orderId = Long.valueOf(idStr.trim());
+            Optional<LegalServiceOrder> orderOpt = orderRepository.findById(orderId);
+            if (orderOpt.isPresent()) {
+                LegalServiceOrder order = orderOpt.get();
+                if (order.getStripePaymentIntentId() != null) {
+                    mockIntentId = order.getStripePaymentIntentId();
+                }
+                System.out.println("Processing simulated payment success for Order ID: " + orderId);
+                boolean processed = processSuccessfulPayment(orderId, mockIntentId, "succeeded");
+                if (processed) {
+                    anyProcessed = true;
+                }
+            }
         }
 
-        LegalServiceOrder order = orderOpt.get();
-        String mockIntentId = order.getStripePaymentIntentId() != null ? order.getStripePaymentIntentId() : "pi_mock_success";
-        
-        System.out.println("Processing simulated payment success for Order ID: " + orderId);
-        boolean processed = processSuccessfulPayment(orderId, mockIntentId, "succeeded");
-
-        if (processed) {
+        if (anyProcessed) {
             return ResponseEntity.ok("{\"status\": \"success\", \"message\": \"Simulated payment processed, notification emails sent, FlowAccount synchronization initialized.\"}");
         } else {
             return ResponseEntity.status(500).body("{\"error\": \"Simulation failed\"}");

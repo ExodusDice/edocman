@@ -50,6 +50,10 @@
                     </button>
                 </div>
                 <div id="user-profile-container" class="hidden" style="display: flex; align-items: center; gap: 15px;">
+                    <button class="btn btn-outline btn-sm" onclick="openCartModal()" style="display: flex; align-items: center; gap: 8px; position: relative;">
+                        <i class="fa-solid fa-cart-shopping"></i> ตะกร้าสินค้า
+                        <span id="cart-badge" class="badge badge-danger" style="display: none; padding: 2px 6px; border-radius: 50%; font-size: 11px;">0</span>
+                    </button>
                     <a href="#" id="user-display-name" onclick="showSection('profile')" style="color: var(--primary); font-weight: 500; text-decoration: none;"><i class="fa-solid fa-circle-user"></i> -</a>
                     <button class="btn btn-sm btn-danger" onclick="executeLogout()">ออกจากระบบ</button>
                 </div>
@@ -418,7 +422,7 @@
                     <!-- Submit Actions -->
                     <div class="form-actions" style="margin-top:30px;">
                         <button type="submit" class="btn btn-primary btn-block btn-lg">
-                            <i class="fa-solid fa-paper-plane"></i> ยืนยันข้อมูลคำขอและชำระค่าบริการ
+                            <i class="fa-solid fa-cart-plus"></i> เพิ่มข้อมูลคำขอลงในตะกร้าสินค้า (Add to Cart)
                         </button>
                     </div>
                 </form>
@@ -835,6 +839,33 @@
             </div>
         </div>
     </section>
+
+    <!-- SHOPPING CART OVERLAY MODAL -->
+    <div id="cart-overlay" class="modal-overlay hidden">
+        <div class="modal-card max-width-600">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-cart-shopping text-primary"></i> ตะกร้าสินค้าของคุณ (Your Shopping Cart)</h3>
+                <button class="btn-close" onclick="closeCartModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="cart-items-container" style="display:flex; flex-direction:column; gap:12px; max-height:350px; overflow-y:auto; padding-right:5px; margin-bottom:15px;">
+                    <!-- Dynamic cart items will be rendered here -->
+                </div>
+                
+                <div class="row-flex" style="font-size: 18px; margin-top:20px; padding-top:15px; border-top:2px solid var(--border-color); font-weight:700;">
+                    <span>ยอดรวมสุทธิ / Subtotal:</span>
+                    <span class="text-primary"><span id="cart-total-price">0.00</span> บาท (THB)</span>
+                </div>
+                
+                <div class="form-actions" style="margin-top:25px; display:flex; gap:10px;">
+                    <button class="btn btn-outline" style="flex:1;" onclick="closeCartModal()">เลือกซื้อบริการเพิ่ม</button>
+                    <button id="cart-checkout-btn" class="btn btn-primary" style="flex:2;" onclick="checkoutCart()">
+                        <i class="fa-solid fa-credit-card"></i> ชำระเงินสุทธิทั้งหมด
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- PREMIUM AUTHENTICATION OVERLAY MODAL -->
     <div id="auth-overlay" class="modal-overlay hidden">

@@ -232,4 +232,54 @@ public class OrderController {
                 return new BigDecimal("1000.00");
         }
     }
+
+    @PostMapping("/bulk")
+    public ResponseEntity<?> createOrdersBulk(@RequestBody List<LegalServiceOrder> orderRequests) {
+        String clerkUserId = UserContext.getCurrentUser();
+        if (clerkUserId == null) {
+            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
+        }
+
+        List<LegalServiceOrder> savedOrders = new java.util.ArrayList<>();
+        Optional<User> userRepositoryOpt = userRepository.findByClerkUserId(clerkUserId);
+
+        for (LegalServiceOrder req : orderRequests) {
+            BigDecimal servicePrice = getStandardPrice(req.getServiceType());
+            LegalServiceOrder order = LegalServiceOrder.builder()
+                    .clerkUserId(clerkUserId)
+                    .serviceType(req.getServiceType())
+                    .status(LegalServiceOrder.OrderStatus.PENDING_PAYMENT)
+                    .price(servicePrice)
+                    .currency("THB")
+                    .serviceData(req.getServiceData())
+                    .build();
+            LegalServiceOrder saved = orderRepository.save(order);
+            savedOrders.add(saved);
+
+            // Send Order Creation confirmation email for each order
+            if (userRepositoryOpt.isPresent()) {
+                User user = userRepositoryOpt.get();
+                String subject = "eDocman: ใบแจ้งงานสำหรับธุรกรรม #" + saved.getId();
+                String serviceName = translateServiceType(saved.getServiceType());
+                String bodyHtml = "<h3>ใบแจ้งยืนยันธุรกรรมคำขอ eDocman</h3>" +
+                        "<p>เรียนคุณ " + user.getFullName() + ",</p>" +
+                        "<p>ระบบได้รับคำขอทำรายการแบบฟอร์มออนไลน์สำเร็จแล้ว รายละเอียดธุรกรรมมีดังนี้:</p>" +
+                        "<ul>" +
+                        "<li><strong>เลขที่อ้างอิง:</strong> #" + saved.getId() + "</li>" +
+                        "<li><strong>ประเภทบริการ:</strong> " + serviceName + "</li>" +
+                        "<li><strong>ยอดชำระ:</strong> " + saved.getPrice() + " บาท</li>" +
+                        "<li><strong>สถานะคำขอ:</strong> รอการชำระเงิน (Pending Payment)</li>" +
+                        "</ul>" +
+                        "<p>คุณสามารถดำเนินการเข้าสู่หน้าแดชบอร์ดเพื่อชำระเงิน หรือจัดการข้อมูลเพิ่มเติมได้ตลอดเวลา</p>" +
+                        "<br><p>ขอบคุณที่ใช้บริการ,<br>ทีมงาน eDocman</p>";
+                try {
+                    resendEmailService.sendEmail(user.getEmail(), subject, bodyHtml);
+                } catch (Exception e) {
+                    System.err.println("Failed to send order email via Resend: " + e.getMessage());
+                }
+            }
+        }
+
+        return ResponseEntity.ok(savedOrders);
+    }
 }

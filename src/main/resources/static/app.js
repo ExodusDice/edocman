@@ -116,6 +116,7 @@ function checkSession() {
         } else {
             document.getElementById('nav-dashboard-link').classList.remove('hidden');
         }
+        initCart();
     } else {
         currentToken = null;
         currentUser = null;
@@ -339,6 +340,7 @@ function executeLogout() {
     localStorage.removeItem('edocman_token');
     localStorage.removeItem('edocman_user');
     localStorage.removeItem('edocman_role');
+    clearCart();
     checkSession();
     showSection('landing');
 }
@@ -484,7 +486,7 @@ function fetchOrders() {
 
             let actionButton = '';
             if (o.status === 'PENDING_PAYMENT') {
-                actionButton = `<button class="btn btn-primary btn-sm" onclick="openPaymentOverlay(${o.id}, '${serviceName}', ${o.price})"><i class="fa-solid fa-credit-card"></i> ชำระเงิน</button>`;
+                actionButton = `<button class="btn btn-primary btn-sm" onclick="addToCartAndOpen(${o.id}, '${serviceName}', ${o.price})"><i class="fa-solid fa-cart-plus"></i> ใส่ตะกร้า & ชำระเงิน</button>`;
             } else if (o.status === 'COMPLETED' && o.officialDocumentUrl) {
                 actionButton = `<a href="${o.officialDocumentUrl}" target="_blank" class="btn btn-success btn-sm"><i class="fa-solid fa-download"></i> ดาวน์โหลดผลอนุมัติ</a>`;
             } else if (o.status === 'PAID' || o.status === 'PROCESSING') {
@@ -1161,9 +1163,20 @@ function handleWizardSubmit(event) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
         
-        // Show success notification & Open payment intent overlay
-        let serviceName = translateServiceType(order.serviceType);
-        openPaymentOverlay(order.id, serviceName, order.price);
+        // Add to cart instead of immediate payment overlay
+        addToCart(order.id, translateServiceType(order.serviceType), order.price);
+        
+        // Reset the form inputs
+        form.reset();
+        document.getElementById('wizard-file-upload').value = '';
+        currentUploadFile = null;
+        document.getElementById('file-upload-status').innerHTML = '';
+        
+        if (confirm("✓ เพิ่มข้อมูลคำขอลงในตะกร้าสินค้าสำเร็จแล้ว! ต้องการเปิดตะกร้าสินค้าเพื่อชำระเงินเลยหรือไม่?")) {
+            openCartModal();
+        } else {
+            showSection('dashboard');
+        }
     })
     .catch(err => {
         console.error("Order creation failed:", err);
@@ -1280,6 +1293,7 @@ function executePayment() {
         document.getElementById('payment-overlay').classList.add('hidden');
         alert("ขอบคุณ! ชำระค่าบริการผ่าน Stripe สำเร็จ ระบบได้ส่งคำร้องเข้ารัฐ ส่งใบเสร็จหาคุณผ่าน Resend Email และเชื่อมข้อมูลระบบบัญชีเรียบร้อยแล้ว");
         
+        clearCart();
         showSection('dashboard');
     })
     .catch(err => {
@@ -1923,4 +1937,154 @@ function promptUploadOfficialDoc(orderId) {
     .catch(err => console.error(err));
 }
 
+let cart = [];
 
+function initCart() {
+    try {
+        const stored = localStorage.getItem('edocman_cart');
+        if (stored) {
+            cart = JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error("Failed to load cart", e);
+    }
+    updateCartBadge();
+}
+
+function updateCartBadge() {
+    const badge = document.getElementById('cart-badge');
+    if (!badge) return;
+    if (cart.length > 0) {
+        badge.innerText = cart.length;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function addToCart(id, serviceName, price) {
+    if (!cart.some(item => item.id === id)) {
+        cart.push({ id, serviceName, price });
+        localStorage.setItem('edocman_cart', JSON.stringify(cart));
+        updateCartBadge();
+    }
+}
+
+function openCartModal() {
+    const overlay = document.getElementById('cart-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('hidden');
+    renderCartItems();
+}
+
+function closeCartModal() {
+    const overlay = document.getElementById('cart-overlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
+}
+
+function removeCartItem(index) {
+    cart.splice(index, 1);
+    localStorage.setItem('edocman_cart', JSON.stringify(cart));
+    updateCartBadge();
+    renderCartItems();
+}
+
+function clearCart() {
+    cart = [];
+    localStorage.removeItem('edocman_cart');
+    updateCartBadge();
+}
+
+function renderCartItems() {
+    const container = document.getElementById('cart-items-container');
+    const subtotalText = document.getElementById('cart-total-price');
+    if (!container) return;
+    
+    if (cart.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding: 30px; color:var(--text-muted);">
+                <i class="fa-solid fa-cart-shopping" style="font-size:36px; margin-bottom:10px; display:block;"></i>
+                ไม่มีรายการใดๆ ในตะกร้าสินค้าในขณะนี้
+            </div>
+        `;
+        subtotalText.innerText = "0.00";
+        document.getElementById('cart-checkout-btn').disabled = true;
+        return;
+    }
+    
+    document.getElementById('cart-checkout-btn').disabled = false;
+    let html = '';
+    let total = 0;
+    
+    cart.forEach((item, index) => {
+        total += item.price;
+        html += `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); padding:12px 15px; border-radius:8px;">
+                <div>
+                    <strong style="color:var(--text-light); font-size:14px; display:block;">${item.serviceName}</strong>
+                    <span class="text-muted" style="font-size:11px;">Ref Order ID: #${item.id}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <span style="font-weight:600; color:var(--primary); font-size:14px;">${item.price.toLocaleString()} THB</span>
+                    <button class="btn btn-sm btn-danger" onclick="removeCartItem(${index})" style="padding: 2px 8px; font-size: 11px;"><i class="fa-solid fa-trash"></i> ลบ</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    subtotalText.innerText = total.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function checkoutCart() {
+    if (cart.length === 0) return;
+    
+    const checkoutBtn = document.getElementById('cart-checkout-btn');
+    const originalText = checkoutBtn.innerHTML;
+    checkoutBtn.disabled = true;
+    checkoutBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังดำเนินการ...`;
+    
+    const orderIds = cart.map(item => item.id);
+    
+    fetch('/api/payments/create-intent', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + currentToken
+        },
+        body: JSON.stringify({ orderIds: orderIds })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Failed to create unified checkout session");
+        return res.json();
+    })
+    .then(paymentData => {
+        checkoutBtn.disabled = false;
+        checkoutBtn.innerHTML = originalText;
+        
+        closeCartModal();
+        
+        const orderIdsCsv = orderIds.join(',');
+        document.getElementById('payment-target-order-id').value = orderIdsCsv;
+        document.getElementById('pay-service-name').innerText = `ตะกร้าบริการ (${cart.length} รายการ)`;
+        
+        let total = cart.reduce((sum, item) => sum + item.price, 0);
+        document.getElementById('pay-service-price').innerText = total.toLocaleString('th-TH');
+        
+        renderPromptPayQr(total);
+        
+        document.getElementById('payment-overlay').classList.remove('hidden');
+    })
+    .catch(err => {
+        alert(err.message);
+        checkoutBtn.disabled = false;
+        checkoutBtn.innerHTML = originalText;
+    });
+}
+
+function addToCartAndOpen(id, serviceName, price) {
+    addToCart(id, serviceName, price);
+    openCartModal();
+}
