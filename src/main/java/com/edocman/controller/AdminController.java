@@ -135,6 +135,48 @@ public class AdminController {
         return ResponseEntity.ok(users);
     }
 
+    @PostMapping("/users/{userId}/role")
+    public ResponseEntity<?> updateUserRole(@PathVariable Long userId, @RequestParam String role) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        User user = userOpt.get();
+        user.setRole(role);
+        userRepository.save(user);
+        return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/users/create")
+    public ResponseEntity<?> createAdminOrUser(@RequestBody User userRequest) {
+        if (userRepository.findByEmail(userRequest.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("{\"error\": \"Email already registered\"}");
+        }
+        
+        User newUser = User.builder()
+                .email(userRequest.getEmail())
+                .fullName(userRequest.getFullName())
+                .phone(userRequest.getPhone())
+                .password(userRequest.getPassword()) // In a production app, we would hash this password
+                .role(userRequest.getRole() != null ? userRequest.getRole() : "CUSTOMER")
+                .twoFactorEnabled(false)
+                .pdpaConsented(true)
+                .build();
+        
+        User saved = userRepository.save(newUser);
+        saved.setPassword(null);
+        return ResponseEntity.ok(saved);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+        if (!userRepository.existsById(userId)) {
+            return ResponseEntity.notFound().build();
+        }
+        userRepository.deleteById(userId);
+        return ResponseEntity.ok("{\"status\": \"success\"}");
+    }
+
     @GetMapping("/config")
     public ResponseEntity<Map<String, Boolean>> getSystemConfig() {
         return ResponseEntity.ok(systemConfigService.getConfigMap());

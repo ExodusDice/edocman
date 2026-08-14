@@ -1598,16 +1598,37 @@ function loadAdminUsers() {
         const tbody = document.getElementById('admin-users-tbody');
         tbody.innerHTML = '';
         users.forEach(u => {
-            const consentDate = u.pdpaConsentDate ? new Date(u.pdpaConsentDate).toLocaleString('th-TH') : '-';
+            let roleBadge = '';
+            if (u.role === 'ADMIN') {
+                roleBadge = '<span class="badge badge-success" style="background:#10b981; color:#fff; font-weight:600;"><i class="fa-solid fa-user-shield"></i> ADMIN</span>';
+            } else {
+                roleBadge = '<span class="badge badge-primary" style="background:#2563eb; color:#fff; font-weight:600;"><i class="fa-solid fa-user"></i> CUSTOMER</span>';
+            }
+
+            const pdpaConsent = u.pdpaConsented 
+                ? '<span class="text-success" style="font-size:12px;"><i class="fa-solid fa-circle-check"></i> ยินยอมแล้ว</span>' 
+                : '<span class="text-danger" style="font-size:12px;"><i class="fa-solid fa-circle-xmark"></i> ยังไม่ยินยอม</span>';
+
+            const actions = `
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-sm btn-outline" onclick="toggleUserRole(${u.id}, '${u.role}')" style="padding:4px 8px; font-size:11px;">
+                        <i class="fa-solid fa-rotate"></i> สลับบทบาท
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUserAccount(${u.id})" style="padding:4px 8px; font-size:11px;">
+                        <i class="fa-solid fa-trash-can"></i> ลบผู้ใช้
+                    </button>
+                </div>
+            `;
+
             tbody.innerHTML += `
-                <tr>
-                    <td>${u.id}</td>
-                    <td><span class="badge badge-warning">${u.clerkUserId}</span></td>
-                    <td>${u.fullName || '-'}</td>
-                    <td>${u.email}</td>
-                    <td>${u.phone || '-'}</td>
-                    <td>${u.pdpaConsented ? '<span class="text-success"><i class="fa-solid fa-circle-check"></i> ยินยอมแล้ว</span>' : '<span class="text-danger"><i class="fa-solid fa-circle-xmark"></i> ยังไม่เซ็น</span>'}</td>
-                    <td>${consentDate}</td>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding:12px 5px;">${u.id}</td>
+                    <td style="padding:12px 5px; font-weight:500;">${u.fullName || '-'}</td>
+                    <td style="padding:12px 5px;">${u.email}</td>
+                    <td style="padding:12px 5px;">${roleBadge}</td>
+                    <td style="padding:12px 5px;">${u.phone || '-'}</td>
+                    <td style="padding:12px 5px;">${pdpaConsent}</td>
+                    <td style="padding:12px 5px;">${actions}</td>
                 </tr>
             `;
         });
@@ -1977,6 +1998,17 @@ function openCartModal() {
     renderCartItems();
 }
 
+// Global scope bindings for inline calls
+window.openCartModal = openCartModal;
+window.closeCartModal = closeCartModal;
+window.removeCartItem = removeCartItem;
+window.checkoutCart = checkoutCart;
+window.addToCartAndOpen = addToCartAndOpen;
+window.openCreateUserModal = openCreateUserModal;
+window.closeCreateUserModal = closeCreateUserModal;
+window.toggleUserRole = toggleUserRole;
+window.deleteUserAccount = deleteUserAccount;
+
 function closeCartModal() {
     const overlay = document.getElementById('cart-overlay');
     if (overlay) {
@@ -2087,4 +2119,86 @@ function checkoutCart() {
 function addToCartAndOpen(id, serviceName, price) {
     addToCart(id, serviceName, price);
     openCartModal();
+}
+
+function openCreateUserModal() {
+    const modal = document.getElementById('create-user-modal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeCreateUserModal() {
+    const modal = document.getElementById('create-user-modal');
+    if (modal) modal.classList.add('hidden');
+    document.getElementById('create-user-form').reset();
+}
+
+function handleCreateUserSubmit(event) {
+    event.preventDefault();
+    const fullName = document.getElementById('cu-fullname').value;
+    const email = document.getElementById('cu-email').value;
+    const phone = document.getElementById('cu-phone').value;
+    const password = document.getElementById('cu-password').value;
+    const role = document.getElementById('cu-role').value;
+
+    fetch('/api/admin/users/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + currentToken
+        },
+        body: JSON.stringify({ fullName, email, phone, password, role })
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.json().then(err => { throw new Error(err.error || "สร้างผู้ใช้ไม่สำเร็จ"); });
+        }
+        return res.json();
+    })
+    .then(data => {
+        alert("✓ สร้างบัญชีผู้ใช้งานสำเร็จเสร็จสิ้น!");
+        closeCreateUserModal();
+        loadAdminUsers();
+    })
+    .catch(err => {
+        alert("เกิดข้อผิดพลาด: " + err.message);
+    });
+}
+
+function toggleUserRole(userId, currentRole) {
+    const newRole = currentRole === 'ADMIN' ? 'CUSTOMER' : 'ADMIN';
+    if (!confirm(`ยืนยันที่จะสลับสิทธิ์ของผู้ใช้นี้เป็น ${newRole} หรือไม่?`)) return;
+
+    fetch(`/api/admin/users/${userId}/role?role=${newRole}`, {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + currentToken
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("ไม่สามารถเปลี่ยนสิทธิ์ผู้ใช้ได้");
+        return res.json();
+    })
+    .then(() => {
+        loadAdminUsers();
+    })
+    .catch(err => alert(err.message));
+}
+
+function deleteUserAccount(userId) {
+    if (!confirm("คุณต้องการลบบัญชีผู้ใช้งานนี้ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้")) return;
+
+    fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': 'Bearer ' + currentToken
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("ไม่สามารถลบบัญชีผู้ใช้ได้");
+        return res.json();
+    })
+    .then(() => {
+        loadAdminUsers();
+    })
+    .catch(err => alert(err.message));
 }
