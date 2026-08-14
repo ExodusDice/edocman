@@ -84,6 +84,35 @@ public class AuthController {
             return ResponseEntity.badRequest().body("{\"error\": \"Email and password are required\"}");
         }
 
+        // 0. Check Beta User Credentials
+        if ("beta1".equals(email) && "beta1".equals(password)) {
+            Map<String, Object> betaResponse = new HashMap<>();
+            betaResponse.put("token", "mock-user-id-beta1");
+            
+            Optional<User> dbUserOpt = userRepository.findAll().stream()
+                    .filter(u -> u.getEmail().equalsIgnoreCase("beta1"))
+                    .findFirst();
+            User user;
+            if (dbUserOpt.isEmpty()) {
+                user = new User();
+                user.setClerkUserId("mock-user-id-beta1");
+                user.setEmail("beta1");
+                user.setFullName("Beta User One");
+                user.setPhone("0891234567");
+                user.setRole("CUSTOMER");
+                user.setPdpaConsented(true);
+                user.setPdpaConsentDate(LocalDateTime.now());
+                user.setPassword(hashPassword("beta1"));
+                userRepository.save(user);
+            } else {
+                user = dbUserOpt.get();
+            }
+            
+            user.setPassword(null);
+            betaResponse.put("user", user);
+            return ResponseEntity.ok(betaResponse);
+        }
+
         // 1. Check Super Admin wa Credentials
         if ("sadminwa".equals(email) && "sadminwa".equals(password)) {
             Map<String, Object> adminResponse = new HashMap<>();
