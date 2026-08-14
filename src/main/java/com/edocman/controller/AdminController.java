@@ -160,4 +160,67 @@ public class AdminController {
         }
         return ResponseEntity.ok(systemConfigService.getConfigMap());
     }
+
+    @PostMapping("/test-resend-automations")
+    public ResponseEntity<?> testResendAutomations(@RequestParam(defaultValue = "frankminor@gmail.com") String targetEmail) {
+        boolean originalSimulation = systemConfigService.isResendSimulation();
+        systemConfigService.setResendSimulation(false);
+        try {
+            // 1. Welcome Email
+            String welcomeSubject = "TEST: ยินดีต้อนรับสู่ eDocman - Welcome Email";
+            String welcomeHtml = "<h3>ยินดีต้อนรับสู่ครอบครัว eDocman! (Email Automation Test)</h3>" +
+                    "<p>เรียนคุณ Frank Minor,</p>" +
+                    "<p>นี่คืออีเมลทดสอบระบบลงทะเบียนผู้ใช้ใหม่ของ <strong>eDocman</strong> ระบบจัดการเอกสารราชการไร้กระดาษ 100%</p>" +
+                    "<p>บัญชีของท่านได้รับการลงทะเบียนเป็นสมาชิกเรียบร้อยแล้วในระบบคลาวด์</p>" +
+                    "<br><p>ขอแสดงความนับถือ,<br>ทีมงาน eDocman</p>";
+            resendEmailService.sendEmail(targetEmail, welcomeSubject, welcomeHtml);
+
+            // 2. Order Confirmation
+            String orderSubject = "TEST: eDocman - ใบแจ้งงานสำหรับธุรกรรม #777";
+            String orderHtml = "<h3>ใบแจ้งยืนยันธุรกรรมคำขอ eDocman (Email Automation Test)</h3>" +
+                    "<p>เรียนคุณ Frank Minor,</p>" +
+                    "<p>นี่คืออีเมลทดสอบเมื่อมีการกรอกแบบฟอร์มทำรายการคำขอสำเร็จ รายละเอียดธุรกรรมมีดังนี้:</p>" +
+                    "<ul>" +
+                    "<li><strong>เลขที่อ้างอิง:</strong> #777</li>" +
+                    "<li><strong>ประเภทบริการ:</strong> จัดตั้งบริษัทจำกัด (บอจ.1)</li>" +
+                    "<li><strong>ยอดชำระ:</strong> 5,500 บาท</li>" +
+                    "<li><strong>สถานะคำขอ:</strong> รอการชำระเงิน (Pending Payment)</li>" +
+                    "</ul>" +
+                    "<br><p>ขอบคุณที่ใช้บริการ,<br>ทีมงาน eDocman</p>";
+            resendEmailService.sendEmail(targetEmail, orderSubject, orderHtml);
+
+            // 3. Payment Confirmation
+            String paymentSubject = "TEST: ใบยืนยันการชำระค่าบริการ eDocman - Order #777";
+            String paymentHtml = "<h3>ขอบคุณสำหรับความไว้วางใจในการใช้บริการ eDocman (Email Automation Test)</h3>" +
+                    "<p>เรียนคุณ Frank Minor,</p>" +
+                    "<p>เราได้รับยอดชำระเงินเรียบร้อยแล้ว สำหรับบริการ: <strong>จัดตั้งบริษัทจำกัด (บอจ.1)</strong></p>" +
+                    "<p><strong>ยอดชำระ:</strong> 5,500 บาท (THB)</p>" +
+                    "<p>ขณะนี้คำร้องของคุณถูกส่งเข้าระบบ Paperless ไปยังหน่วยงานภาครัฐเรียบร้อยแล้ว ทีมงาน eDocman กำลังดำเนินการในขั้นตอนต่อไป</p>" +
+                    "<br><p>ขอแสดงความนับถือ,<br>ทีมงาน eDocman</p>";
+            resendEmailService.sendEmail(targetEmail, paymentSubject, paymentHtml);
+
+            // 4. Order Approved
+            String approvalSubject = "TEST: eDocman: เอกสารอนุมัติราชการเสร็จสมบูรณ์แล้ว - คำขอ #777";
+            String approvalHtml = "<h3>คำขอทำรายการสำเร็จเรียบร้อยแล้ว (Email Automation Test)</h3>" +
+                    "<p>เรียนคุณ Frank Minor,</p>" +
+                    "<p>ธุรกรรม <strong>จัดตั้งบริษัทจำกัด (บอจ.1)</strong> (เลขที่อ้างอิง #777) ของท่านได้รับการอนุมัติและออกเอกสารจากหน่วยงานภาครัฐเรียบร้อยแล้ว</p>" +
+                    "<p>ท่านสามารถคลิกดาวน์โหลดเอกสารรับรองที่เป็นทางการได้จากลิงก์ด้านล่างนี้:</p>" +
+                    "<p><a href='http://localhost:8080/api/orders/777/document/print' style='display:inline-block; background-color:#10b981; color:#fff; padding:10px 20px; text-decoration:none; border-radius:4px; font-weight:bold;' target='_blank'>ดาวน์โหลดเอกสารผลอนุมัติ</a></p>" +
+                    "<br><p>ขอแสดงความนับถือ,<br>ทีมงาน eDocman</p>";
+            resendEmailService.sendEmail(targetEmail, approvalSubject, approvalHtml);
+
+            // 5. 2FA OTP
+            String otpSubject = "TEST: รหัสยืนยันความปลอดภัย 2FA สำหรับ eDocman: 123456";
+            String otpHtml = "<h3>รหัสผ่านแบบใช้ครั้งเดียว (OTP) ของคุณ (Email Automation Test)</h3>" +
+                    "<p>คุณกำลังล็อกอินเข้าสู่ระบบ eDocman กรุณาใช้รหัสยืนยัน 2FA ด้านล่างเพื่อเสร็จสิ้นกระบวนการ:</p>" +
+                    "<h2 style='color:#d97706; letter-spacing:4px; font-family:monospace;'>123456</h2>" +
+                    "<p>รหัสนี้มีอายุการใช้งาน 5 นาที</p>" +
+                    "<br><p>ขอแสดงความนับถือ,<br>ทีมงาน eDocman</p>";
+            resendEmailService.sendEmail(targetEmail, otpSubject, otpHtml);
+
+            return ResponseEntity.ok("{\"status\":\"success\",\"message\":\"ส่งอีเมลทดสอบ Resend ทั้งหมด 5 รูปแบบไปยัง " + targetEmail + " เรียบร้อยแล้ว! กรุณาตรวจสอบในกล่องจดหมายเข้า (หรือสแปม)\"}");
+        } finally {
+            systemConfigService.setResendSimulation(originalSimulation);
+        }
+    }
 }

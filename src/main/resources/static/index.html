@@ -754,6 +754,16 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Resend Live Email Sandbox Test Card -->
+                        <div class="card bg-dark" style="margin-top: 25px; padding: 25px; border: 1px solid var(--primary);">
+                            <strong style="color: var(--text-light); font-size: 15px; display: block; margin-bottom: 5px;"><i class="fa-solid fa-envelope-open-text text-primary"></i> 📧 ทดสอบระบบส่งอีเมลจริงด้วย Resend (Live Email Sandbox Test)</strong>
+                            <p class="text-muted" style="font-size: 12px; margin: 0 0 15px 0; line-height: 1.4;">กรอกอีเมลปลายทางเพื่อส่งทดสอบ Use Cases ทั้งหมด 5 รูปแบบ (Welcome, Order Confirmation, Payment Success, Admin Approval และ 2FA OTP) ไปยังเมลบ็อกซ์ของคุณจริงผ่านทาง API Key</p>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <input type="email" id="test-email-target" class="form-control" value="frankminor@gmail.com" placeholder="กรอกอีเมลของคุณ..." style="flex: 1.5; min-width: 250px;">
+                                <button type="button" class="btn btn-primary" onclick="sendTestEmails()" style="flex: 0.8; min-width: 150px;"><i class="fa-solid fa-paper-plane"></i> ส่งอีเมลทดสอบ</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

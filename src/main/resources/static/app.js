@@ -1761,4 +1761,29 @@ function handleProfileUpdate(e) {
     });
 }
 
+function sendTestEmails() {
+    const email = document.getElementById('test-email-target').value;
+    if (!email) {
+        alert("กรุณากรอกอีเมลปลายทาง");
+        return;
+    }
+    
+    fetch(`/api/admin/test-resend-automations?targetEmail=${encodeURIComponent(email)}`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + currentToken }
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("ล้มเหลวในการส่งอีเมลทดสอบ");
+        }
+        return res.json();
+    })
+    .then(data => {
+        alert(data.message);
+    })
+    .catch(err => {
+        alert(err.message);
+    });
+}
+
 
