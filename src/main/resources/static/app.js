@@ -1633,7 +1633,9 @@ function populateProfileFields() {
     document.getElementById('profile-phone').value = currentUser.phone || '';
     document.getElementById('profile-role').value = currentUser.role || 'CUSTOMER';
     
-    document.getElementById('profile-2fa-toggle').checked = !!currentUser.twoFactorEnabled;
+    const is2fa = !!currentUser.twoFactorEnabled;
+    document.getElementById('profile-2fa-toggle').checked = is2fa;
+    update2faLabel(is2fa);
     
     const pdpaDateSpan = document.getElementById('profile-pdpa-date');
     if (currentUser.pdpaConsentDate) {
@@ -1780,6 +1782,49 @@ function sendTestEmails() {
     })
     .then(data => {
         alert(data.message);
+    })
+    .catch(err => {
+        alert(err.message);
+    });
+}
+
+function update2faLabel(isChecked) {
+    const label = document.getElementById('profile-2fa-status-label');
+    if (label) {
+        label.textContent = isChecked ? "สถานะ: เปิดใช้งาน (Enabled)" : "สถานะ: ปิดใช้งาน (Disabled)";
+    }
+}
+
+function update2faSettings() {
+    if (!currentUser) return;
+    const isChecked = document.getElementById('profile-2fa-toggle').checked;
+    
+    const payload = {
+        email: currentUser.email,
+        fullName: currentUser.fullName,
+        phone: currentUser.phone,
+        twoFactorEnabled: isChecked
+    };
+    
+    fetch('/api/auth/update-profile', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + currentToken
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.json().then(err => { throw new Error(err.error || "เกิดข้อผิดพลาดในการอัปเดตข้อมูล 2FA"); });
+        }
+        return res.json();
+    })
+    .then(updatedUser => {
+        alert(`✓ 2FA has been successfully ${isChecked ? 'enabled' : 'disabled'}!`);
+        currentUser = updatedUser;
+        localStorage.setItem('edocman_user', JSON.stringify(updatedUser));
+        checkSession();
     })
     .catch(err => {
         alert(err.message);

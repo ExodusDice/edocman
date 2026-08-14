@@ -487,17 +487,25 @@
                         </div>
                     </div>
 
-                    <div style="margin: 20px 0; border-top: 1px solid var(--border-color); padding-top: 20px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <!-- Two-Factor Authentication (2FA) Toggle Card (FinCommerce Style) -->
+                    <div class="card bg-dark" style="margin: 25px 0 15px 0; padding: 20px; border: 1px solid var(--border-color); border-radius: 8px; background: rgba(15, 23, 42, 0.6);">
+                        <h3 style="font-size: 15px; margin: 0 0 8px 0; color: var(--warning); display: flex; align-items: center; gap: 8px;">
+                            <span>🛡️</span> Two-Factor Auth (2FA) / การยืนยันตัวตนผ่านระบบสองขั้นตอน
+                        </h3>
+                        <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 15px 0; line-height: 1.4;">
+                            เพิ่มความปลอดภัยให้บัญชีของคุณ โดยการกำหนดให้ต้องกรอกรหัสผ่านแบบใช้ครั้งเดียว (OTP) 6 หลักที่จะส่งไปยังอีเมลของคุณเมื่อลงชื่อเข้าใช้งาน
+                        </p>
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 12px 15px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 15px;">
                             <div>
-                                <strong style="font-size: 14px; display: block; color: var(--text-light);"><i class="fa-solid fa-key"></i> เปิดใช้งานล็อกอิน 2FA (Two-Factor Verification)</strong>
-                                <span style="font-size: 11px; color: var(--text-muted);">เมื่อเปิดใช้งาน ทุกการล็อกอินจะต้องระบุรหัส OTP 6 หลักที่ส่งไปทางอีเมล</span>
+                                <span style="font-size: 13px; font-weight: 600; display: block; color: var(--text-light);" id="profile-2fa-status-label">สถานะ: ปิดใช้งาน (Disabled)</span>
+                                <span style="font-size: 11px; color: var(--text-muted);" id="profile-2fa-desc">Require OTP confirmation during sign in</span>
                             </div>
-                            <label class="switch-container" style="position: relative; display: inline-block; width: 44px; height: 24px;">
-                                <input type="checkbox" id="profile-2fa-toggle" style="opacity: 0; width: 0; height: 0;">
-                                <span class="switch-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .4s; border-radius: 24px;"></span>
+                            <label class="switch">
+                                <input type="checkbox" id="profile-2fa-toggle" onchange="update2faLabel(this.checked)">
+                                <span class="slider round"></span>
                             </label>
                         </div>
+                        <button type="button" id="btn-save-2fa" class="btn" onclick="update2faSettings()" style="padding: 6px 15px; font-size: 12px; width: auto; margin: 0; border: 1px solid var(--warning); color: var(--warning); background: transparent; border-radius: 4px; cursor: pointer; transition: 0.3s;">Update 2FA Settings</button>
                     </div>
 
                     <div style="display: flex; gap: 15px; margin-top: 30px;">
