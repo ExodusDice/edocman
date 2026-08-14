@@ -77,12 +77,15 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String password = credentials.get("password");
+        String rawEmail = credentials.get("email");
+        String rawPassword = credentials.get("password");
 
-        if (email == null || password == null) {
+        if (rawEmail == null || rawPassword == null) {
             return ResponseEntity.badRequest().body("{\"error\": \"Email and password are required\"}");
         }
+
+        String email = rawEmail.trim().toLowerCase();
+        String password = rawPassword.trim();
 
         // 0. Check Beta User Credentials
         if ("beta1".equals(email) && "beta1".equals(password)) {
