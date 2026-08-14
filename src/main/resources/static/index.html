@@ -657,6 +657,7 @@
                     <!-- Admin Navigation Tabs -->
                     <div class="admin-tabs">
                         <button class="admin-tab-btn active" onclick="switchAdminTab('orders-tab')"><i class="fa-solid fa-gavel"></i> ตรวจสอบเอกสารราชการ</button>
+                        <button class="admin-tab-btn" onclick="switchAdminTab('purchased-services-tab')"><i class="fa-solid fa-box-archive"></i> จัดการบริการลูกค้า (Purchased Services)</button>
                         <button class="admin-tab-btn" onclick="switchAdminTab('users-tab')"><i class="fa-solid fa-users"></i> ทะเบียนบัญชีลูกค้า</button>
                         <button class="admin-tab-btn" onclick="switchAdminTab('settings-tab')"><i class="fa-solid fa-sliders"></i> ตั้งค่าเชื่อมต่อ SaaS (Mock/Live)</button>
                     </div>
@@ -679,6 +680,36 @@
                                 </thead>
                                 <tbody id="admin-orders-tbody">
                                     <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB 1.5: Purchased Services panel -->
+                    <div id="admin-tab-purchased-services-tab" class="admin-tab-content hidden">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                            <h3 style="margin: 0;"><i class="fa-solid fa-box-archive text-warning"></i> บริการที่ชำระเงินแล้วของลูกค้า (Paid Purchased Services)</h3>
+                            <div>
+                                <input type="text" id="purchased-search-input" onkeyup="filterPurchasedServices()" placeholder="ค้นหาตามไอดี หรือบริการ..." class="form-control" style="width: 250px; font-size: 13px; margin: 0; padding: 6px 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px;">
+                            </div>
+                        </div>
+                        <p class="text-muted" style="font-size: 13px; margin-bottom: 20px;">แสดงเฉพาะบริการคำสั่งซื้อที่มีการชำระเงินเรียบร้อยแล้ว (สถานะ PAID, PROCESSING, COMPLETED) แอดมินสามารถอัปเดตความคืบหน้า หรืออัปโหลดเอกสารราชการที่เสร็จสมบูรณ์ได้จากที่นี่</p>
+                        <div class="admin-orders-table-wrapper">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>OrderID</th>
+                                        <th>ชื่อลูกค้า / อีเมล</th>
+                                        <th>บริการที่ซื้อ</th>
+                                        <th>ราคา (THB)</th>
+                                        <th>ความคืบหน้าคำขอ</th>
+                                        <th>เอกสารอนุมัติราชการ</th>
+                                        <th>การจัดการ (Actions)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-purchased-services-tbody">
+                                    <!-- Populated dynamically -->
+                                    <tr><td colspan="7" style="text-align:center;" class="text-muted">กำลังโหลดข้อมูล...</td></tr>
                                 </tbody>
                             </table>
                         </div>

@@ -1349,6 +1349,7 @@ function fetchAdminOrders() {
             `;
         });
         tbody.innerHTML = html;
+        populatePurchasedServices(orders);
     })
     .catch(err => console.error("Error fetching admin orders:", err));
 }
@@ -1829,6 +1830,97 @@ function update2faSettings() {
     .catch(err => {
         alert(err.message);
     });
+}
+
+let allPurchasedServices = [];
+
+function populatePurchasedServices(orders) {
+    allPurchasedServices = orders.filter(o => o.status === 'PAID' || o.status === 'PROCESSING' || o.status === 'COMPLETED');
+    renderPurchasedServices(allPurchasedServices);
+}
+
+function renderPurchasedServices(filteredOrders) {
+    const tbody = document.getElementById('admin-purchased-services-tbody');
+    if (!tbody) return;
+    
+    if (!filteredOrders || filteredOrders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;" class="text-muted">ไม่มีรายการบริการที่ชำระเงินแล้วในขณะนี้</td></tr>`;
+        return;
+    }
+    
+    let html = '';
+    filteredOrders.forEach(o => {
+        let statusText = '';
+        if (o.status === 'PAID') statusText = '<span class="badge badge-primary">ชำระเงินแล้ว (เตรียมส่งเรื่อง)</span>';
+        else if (o.status === 'PROCESSING') statusText = '<span class="badge badge-warning">กำลังดำเนินการยื่นแบบ</span>';
+        else if (o.status === 'COMPLETED') statusText = '<span class="badge badge-success">อนุมัติเรียบร้อย</span>';
+        
+        let docText = '';
+        if (o.officialDocumentUrl) {
+            docText = `<a href="${o.officialDocumentUrl}" target="_blank" class="btn btn-outline btn-sm" style="color:var(--success); border-color:var(--success); padding:2px 6px; font-size:11px;"><i class="fa-solid fa-download"></i> ดาวน์โหลดเอกสาร</a>`;
+        } else {
+            docText = `<span class="text-muted" style="font-size:11px;"><i class="fa-solid fa-hourglass-half"></i> รอการอัปโหลด</span>`;
+        }
+        
+        let actions = '';
+        if (o.status === 'PAID') {
+            actions = `
+                <button class="btn btn-outline btn-sm" onclick="updateAdminOrderStatus(${o.id}, 'PROCESSING')" style="color:#0ea5e9; border-color:#0ea5e9; padding:2px 6px; font-size:11px;">เริ่มยื่นแบบ</button>
+            `;
+        } else if (o.status === 'PROCESSING') {
+            actions = `
+                <button class="btn btn-success btn-sm" onclick="promptUploadOfficialDoc(${o.id})" style="padding:2px 6px; font-size:11px;"><i class="fa-solid fa-upload"></i> อัปโหลด & อนุมัติ</button>
+            `;
+        } else if (o.status === 'COMPLETED') {
+            actions = `<span class="text-success" style="font-size:12px; font-weight:600;"><i class="fa-solid fa-check-double"></i> เสร็จสิ้นแล้ว</span>`;
+        }
+        
+        html += `
+            <tr>
+                <td class="font-mono">#${o.id}</td>
+                <td>
+                    <div style="font-weight:600; color:var(--text-light);">${o.clerkUserId}</div>
+                    <div style="font-size:11px; color:var(--text-muted);">Customer Account</div>
+                </td>
+                <td><strong>${translateServiceType(o.serviceType)}</strong></td>
+                <td>${o.price.toLocaleString()} THB</td>
+                <td>${statusText}</td>
+                <td>${docText}</td>
+                <td><div style="display:flex; gap:5px;">${actions}</div></td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
+
+function filterPurchasedServices() {
+    const searchVal = document.getElementById('purchased-search-input').value.toLowerCase();
+    const filtered = allPurchasedServices.filter(o => {
+        const orderIdMatch = o.id.toString().includes(searchVal);
+        const customerMatch = o.clerkUserId.toLowerCase().includes(searchVal);
+        const serviceMatch = translateServiceType(o.serviceType).toLowerCase().includes(searchVal);
+        return orderIdMatch || customerMatch || serviceMatch;
+    });
+    renderPurchasedServices(filtered);
+}
+
+function promptUploadOfficialDoc(orderId) {
+    const docUrl = prompt("กรุณาระบุ URL ลิงก์เอกสารอนุมัติราชการที่เป็นทางการ (หรือปล่อยว่างไว้เพื่อระบบจะเจนเนอเรตแบบฟอร์มจำลองให้อัตโนมัติ):");
+    if (docUrl === null) return;
+    
+    let url = `/api/admin/orders/${orderId}/approve`;
+    if (docUrl.trim()) {
+        url += `?officialDocUrl=${encodeURIComponent(docUrl.trim())}`;
+    }
+    
+    fetch(url, {
+        method: 'POST'
+    })
+    .then(res => res.json())
+    .then(() => {
+        fetchAdminOrders();
+    })
+    .catch(err => console.error(err));
 }
 
 
