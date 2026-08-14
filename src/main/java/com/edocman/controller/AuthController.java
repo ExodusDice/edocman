@@ -41,6 +41,7 @@ public class AuthController {
                     .findFirst();
         }
 
+        boolean isNew = existingUser.isEmpty();
         User user;
 
         if (existingUser.isPresent()) {
@@ -70,6 +71,22 @@ public class AuthController {
         }
 
         User savedUser = userRepository.save(user);
+
+        if (isNew) {
+            // Send Welcome Email via Resend
+            String welcomeSubject = "ยินดีต้อนรับสู่ eDocman - ระบบจัดการเอกสารราชการไร้กระดาษ";
+            String welcomeHtml = "<h3>ยินดีต้อนรับสู่ครอบครัว eDocman!</h3>" +
+                    "<p>เรียนคุณ " + savedUser.getFullName() + ",</p>" +
+                    "<p>ขอขอบพระคุณสำหรับการสมัครสมาชิกเข้าใช้บริการ <strong>eDocman</strong> ระบบจัดเตรียม ยื่นแบบ และอนุมัติเอกสารกฎหมายไทยไร้กระดาษ 100%</p>" +
+                    "<p>คุณสามารถเริ่มต้นยื่นแบบจดทะเบียนจัดตั้งบริษัท จองชื่อบริษัท ยื่นงบ DBD หรือซื้อ พ.ร.บ. ผ่านระบบออนไลน์ได้อย่างรวดเร็วในแดชบอร์ดของคุณ</p>" +
+                    "<br><p>ขอแสดงความนับถือ,<br>ทีมงานพัฒนา eDocman</p>";
+            try {
+                resendEmailService.sendEmail(savedUser.getEmail(), welcomeSubject, welcomeHtml);
+            } catch (Exception e) {
+                System.err.println("Failed to send welcome email via Resend: " + e.getMessage());
+            }
+        }
+
         // Clear password in response for security
         savedUser.setPassword(null);
         return ResponseEntity.ok(savedUser);

@@ -35,6 +35,9 @@ public class OrderController {
     @Autowired
     private DocumentGeneratorService documentGeneratorService;
 
+    @Autowired
+    private com.edocman.service.ResendEmailService resendEmailService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostMapping
@@ -56,7 +59,54 @@ public class OrderController {
                 .build();
 
         LegalServiceOrder savedOrder = orderRepository.save(order);
+
+        // Send Order Creation confirmation email
+        Optional<User> userOpt = userRepository.findByClerkUserId(clerkUserId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            String subject = "eDocman: ใบแจ้งงานสำหรับธุรกรรม #" + savedOrder.getId();
+            String serviceName = translateServiceType(savedOrder.getServiceType());
+            String bodyHtml = "<h3>ใบแจ้งยืนยันธุรกรรมคำขอ eDocman</h3>" +
+                    "<p>เรียนคุณ " + user.getFullName() + ",</p>" +
+                    "<p>ระบบได้รับคำขอทำรายการแบบฟอร์มออนไลน์สำเร็จแล้ว รายละเอียดธุรกรรมมีดังนี้:</p>" +
+                    "<ul>" +
+                    "<li><strong>เลขที่อ้างอิง:</strong> #" + savedOrder.getId() + "</li>" +
+                    "<li><strong>ประเภทบริการ:</strong> " + serviceName + "</li>" +
+                    "<li><strong>ยอดชำระ:</strong> " + savedOrder.getPrice() + " บาท</li>" +
+                    "<li><strong>สถานะคำขอ:</strong> รอการชำระเงิน (Pending Payment)</li>" +
+                    "</ul>" +
+                    "<p>คุณสามารถดำเนินการเข้าสู่หน้าแดชบอร์ดเพื่อชำระเงิน หรือจัดการข้อมูลเพิ่มเติมได้ตลอดเวลา</p>" +
+                    "<br><p>ขอบคุณที่ใช้บริการ,<br>ทีมงาน eDocman</p>";
+            try {
+                resendEmailService.sendEmail(user.getEmail(), subject, bodyHtml);
+            } catch (Exception e) {
+                System.err.println("Failed to send order email via Resend: " + e.getMessage());
+            }
+        }
+
         return ResponseEntity.ok(savedOrder);
+    }
+
+    private String translateServiceType(LegalServiceOrder.ServiceType type) {
+        if (type == null) return "บริการทั่วไป";
+        switch (type) {
+            case CAR_PRB_INSURANCE: return "ประกันภัย พ.ร.บ. รถยนต์";
+            case COMPANY_CLOSING: return "เลิกและชำระบัญชีบริษัท";
+            case COMPANY_DIRECTOR_CHANGE: return "เปลี่ยนตัวกรรมการ (เจ้าของ)";
+            case COMPANY_NAME_CHANGE: return "จดทะเบียนเปลี่ยนชื่อบริษัท";
+            case COMPANY_NAME_RESERVATION: return "จองชื่อบริษัท (DBD)";
+            case COMPANY_OPENING: return "จัดตั้งบริษัทจำกัด (บอจ.1)";
+            case DBD_E_FILING: return "นำส่งงบ e-Filing";
+            case FINANCIAL_STATEMENT_APPROVAL: return "อนุมัติงบการเงิน (AGM)";
+            case FINANCIAL_STATEMENT_AUDIT: return "ตรวจสอบงบการเงิน (CPA)";
+            case FINANCIAL_STATEMENT_PREP: return "จัดทำงบการเงินประจำปี";
+            case HOUSE_REGISTRATION_UPDATE: return "แก้ไขข้อมูลทะเบียนบ้าน";
+            case MEMORANDUM_AMENDMENT: return "แก้ไขหนังสือบริคณห์สนธิ";
+            case PDPA_BADGE_SETUP: return "ตราสัญลักษณ์ PDPA Badge";
+            case SHAREHOLDER_UPDATE: return "แก้ไขรายชื่อผู้ถือหุ้น (บอจ.5)";
+            case SMART_ETAX: return "ระบบ Smart e-Tax Invoice";
+            default: return type.name();
+        }
     }
 
     @GetMapping

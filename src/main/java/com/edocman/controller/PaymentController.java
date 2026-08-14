@@ -157,9 +157,10 @@ public class PaymentController {
 
         // 2. Send transaction confirmation email via Resend
         String emailSubject = "ใบยืนยันการชำระค่าบริการ eDocman - Order #" + order.getId();
+        String serviceName = translateServiceType(order.getServiceType());
         String emailHtml = "<h3>ขอบคุณสำหรับความไว้วางใจในการใช้บริการ eDocman</h3>" +
                 "<p>เรียนคุณ " + name + ",</p>" +
-                "<p>เราได้รับยอดชำระเงินเรียบร้อยแล้ว สำหรับบริการ: <strong>" + order.getServiceType() + "</strong></p>" +
+                "<p>เราได้รับยอดชำระเงินเรียบร้อยแล้ว สำหรับบริการ: <strong>" + serviceName + "</strong></p>" +
                 "<p><strong>ยอดชำระ:</strong> " + order.getPrice() + " บาท (THB)</p>" +
                 "<p>ขณะนี้คำร้องของคุณถูกส่งเข้าระบบ Paperless ไปยังหน่วยงานภาครัฐเรียบร้อยแล้ว ทีมงาน eDocman กำลังดำเนินการในขั้นตอนต่อไป</p>" +
                 "<p>คุณสามารถดาวน์โหลดแบบฟอร์มที่กรอกข้อมูลสมบูรณ์ หรือตรวจสอบสถานะได้ตลอดเวลาผ่านทาง แดชบอร์ด eDocman ของคุณ</p>" +
@@ -173,5 +174,27 @@ public class PaymentController {
         }
 
         return true;
+    }
+
+    private String translateServiceType(LegalServiceOrder.ServiceType type) {
+        if (type == null) return "บริการทั่วไป";
+        switch (type) {
+            case CAR_PRB_INSURANCE: return "ประกันภัย พ.ร.บ. รถยนต์";
+            case COMPANY_CLOSING: return "เลิกและชำระบัญชีบริษัท";
+            case COMPANY_DIRECTOR_CHANGE: return "เปลี่ยนตัวกรรมการ (เจ้าของ)";
+            case COMPANY_NAME_CHANGE: return "จดทะเบียนเปลี่ยนชื่อบริษัท";
+            case COMPANY_NAME_RESERVATION: return "จองชื่อบริษัท (DBD)";
+            case COMPANY_OPENING: return "จัดตั้งบริษัทจำกัด (บอจ.1)";
+            case DBD_E_FILING: return "นำส่งงบ e-Filing";
+            case FINANCIAL_STATEMENT_APPROVAL: return "อนุมัติงบการเงิน (AGM)";
+            case FINANCIAL_STATEMENT_AUDIT: return "ตรวจสอบงบการเงิน (CPA)";
+            case FINANCIAL_STATEMENT_PREP: return "จัดทำงบการเงินประจำปี";
+            case HOUSE_REGISTRATION_UPDATE: return "แก้ไขข้อมูลทะเบียนบ้าน";
+            case MEMORANDUM_AMENDMENT: return "แก้ไขหนังสือบริคณห์สนธิ";
+            case PDPA_BADGE_SETUP: return "ตราสัญลักษณ์ PDPA Badge";
+            case SHAREHOLDER_UPDATE: return "แก้ไขรายชื่อผู้ถือหุ้น (บอจ.5)";
+            case SMART_ETAX: return "ระบบ Smart e-Tax Invoice";
+            default: return type.name();
+        }
     }
 }
