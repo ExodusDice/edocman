@@ -80,7 +80,47 @@ public class LegalServiceOrder {
         SHAREHOLDER_UPDATE,
         FINANCIAL_STATEMENT_AUDIT,
         FINANCIAL_STATEMENT_APPROVAL,
-        SMART_ETAX
+        SMART_ETAX,
+        
+        // 1. Motor Insurance
+        INSURANCE_POLICY_ENDORSEMENT,
+        INSURANCE_VOLUNTARY_MOTOR,
+        
+        // 2. DLT & Vehicle Paperwork
+        VEHICLE_TAX_RENEWAL,
+        VEHICLE_OVERDUE_TAX_FINES,
+        VEHICLE_POWER_OF_ATTORNEY,
+        VEHICLE_PLATE_REPLACEMENT,
+        VEHICLE_BOOK_REPLACEMENT,
+        VEHICLE_SPEC_ALTERATION,
+        VEHICLE_PROVINCE_TRANSFER,
+        
+        // 3. Visas & Immigration
+        VISA_90DAY_REPORTING,
+        VISA_TM30_NOTIFICATION,
+        VISA_OUTBOUND_APPLICATION_PACK,
+        
+        // 4. Social Security & Labor
+        SSO_ARTICLE_39_40_ENROLLMENT,
+        SSO_HOSPITAL_CHANGE,
+        SSO_COMPENSATION_CLAIMS,
+        
+        // 5. Revenue Department & Tax Filings
+        TAX_PERSONAL_INCOME_EFILING,
+        TAX_VAT_REGISTRATION_SUBMISSION,
+        TAX_WITHHOLDING_CERT_50TAWI,
+        
+        // 6. Commercial & Municipal Licensing
+        LICENSE_DIRECT_SALES_OCPB,
+        LICENSE_MUSIC_COPYRIGHT,
+        LICENSE_SIGNBOARD_TAX,
+        
+        // 7. Legal Agreements, DBD & Notarization
+        DBD_NAME_RESERVATION_ECERT,
+        LEGAL_FORM_GENERATION,
+        LEGAL_POA_DISPATCH,
+        LEGAL_REMOTE_ESIGN_CONTRACT,
+        LEGAL_NOTARY_TRANSLATION_HUB
     }
 
     public enum OrderStatus {

@@ -28,6 +28,7 @@ public class ClerkAuthFilter implements Filter {
         if (!path.startsWith("/api/") || 
             (path.startsWith("/api/auth/") && !path.startsWith("/api/auth/me")) || 
             path.startsWith("/api/payments/webhook") ||
+            path.startsWith("/api/orders/services") ||
             path.contains("/document/print") ||
             path.contains("/document/official")) {
             chain.doFilter(request, response);

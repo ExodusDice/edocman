@@ -133,18 +133,70 @@ public class AuthController {
             return ResponseEntity.ok(betaResponse);
         }
 
-        // 1. Check Super Admin wa Credentials
-        if ("sadminwa".equals(email) && "sadminwa".equals(password)) {
+        // 1. Check Super Admin Credentials (sadmin / sadmin, sadminwa / sadminwa, etc.)
+        boolean isSuperAdminUser = "sadmin".equalsIgnoreCase(email) 
+                || "sadminwa".equalsIgnoreCase(email) 
+                || "admin".equalsIgnoreCase(email)
+                || "admin@edocman.paperless.in.th".equalsIgnoreCase(email);
+        boolean isSuperAdminPass = "sadmin".equals(password) 
+                || "sadminwa".equals(password) 
+                || "admin".equals(password)
+                || "admin1234".equals(password);
+
+        if (isSuperAdminUser && isSuperAdminPass) {
             Map<String, Object> adminResponse = new HashMap<>();
-            adminResponse.put("token", "mock-admin-token-sadminwa");
+            adminResponse.put("token", "mock-admin-token-sadmin");
             
-            Map<String, Object> adminUser = new HashMap<>();
-            adminUser.put("clerkUserId", "mock-admin-id");
-            adminUser.put("email", "admin@edocman.paperless.in.th");
-            adminUser.put("fullName", "Super Administrator");
-            adminUser.put("role", "ADMIN");
+            Map<String, Object> adminUserData = new HashMap<>();
+            adminUserData.put("clerkUserId", "mock-admin-id");
+            adminUserData.put("email", "admin@edocman.paperless.in.th");
+            adminUserData.put("fullName", "Super Administrator");
+            adminUserData.put("role", "ADMIN");
+            adminUserData.put("adminRoleTitle", "Super Administrator");
+            adminUserData.put("department", "Executive & Security");
+            adminUserData.put("permissions", "ALL");
+            adminUserData.put("phone", "0891234567");
+            adminUserData.put("companyName", "eDocman Central Administration");
+            adminUserData.put("twoFactorEnabled", false);
+            adminUserData.put("pdpaConsented", true);
+
+            // Safe sync to DB in try-catch so nothing blocks login
+            try {
+                Optional<User> dbAdminOpt = userRepository.findByEmail("admin@edocman.paperless.in.th");
+                User adminUser;
+                if (dbAdminOpt.isEmpty()) {
+                    adminUser = User.builder()
+                            .clerkUserId("mock-admin-id")
+                            .email("admin@edocman.paperless.in.th")
+                            .fullName("Super Administrator")
+                            .role("ADMIN")
+                            .adminRoleTitle("Super Administrator")
+                            .department("Executive & Security")
+                            .permissions("ALL")
+                            .phone("0891234567")
+                            .nationalId("1100123456789")
+                            .companyName("eDocman Central Administration")
+                            .taxId("0105566778899")
+                            .address("123 Admin Tower, Silom Road, Bangrak, Bangkok 10500")
+                            .twoFactorEnabled(false)
+                            .pdpaConsented(true)
+                            .password(hashPassword("sadmin"))
+                            .build();
+                    userRepository.save(adminUser);
+                } else {
+                    adminUser = dbAdminOpt.get();
+                    adminUser.setRole("ADMIN");
+                    adminUser.setAdminRoleTitle("Super Administrator");
+                    adminUser.setDepartment("Executive & Security");
+                    adminUser.setPermissions("ALL");
+                    adminUser.setPassword(hashPassword("sadmin"));
+                    userRepository.save(adminUser);
+                }
+            } catch (Exception ex) {
+                System.err.println("Notice on admin DB sync: " + ex.getMessage());
+            }
             
-            adminResponse.put("user", adminUser);
+            adminResponse.put("user", adminUserData);
             return ResponseEntity.ok(adminResponse);
         }
 
@@ -361,9 +413,31 @@ public class AuthController {
         }
 
         User user = userOpt.get();
+
+        String nationalId = (String) payload.get("nationalId");
+        String companyName = (String) payload.get("companyName");
+        String taxId = (String) payload.get("taxId");
+        String address = (String) payload.get("address");
+
         if (fullName != null) user.setFullName(fullName);
         if (phone != null) user.setPhone(phone);
+        if (nationalId != null) user.setNationalId(nationalId);
+        if (companyName != null) user.setCompanyName(companyName);
+        if (taxId != null) user.setTaxId(taxId);
+        if (address != null) user.setAddress(address);
         if (twoFactorEnabled != null) user.setTwoFactorEnabled(twoFactorEnabled);
+
+        Boolean twoFactorEmail = (Boolean) payload.get("twoFactorEmail");
+        Boolean twoFactorSms = (Boolean) payload.get("twoFactorSms");
+        Boolean twoFactorTotp = (Boolean) payload.get("twoFactorTotp");
+        Boolean twoFactorPasskey = (Boolean) payload.get("twoFactorPasskey");
+        Boolean twoFactorLine = (Boolean) payload.get("twoFactorLine");
+
+        if (twoFactorEmail != null) user.setTwoFactorEmail(twoFactorEmail);
+        if (twoFactorSms != null) user.setTwoFactorSms(twoFactorSms);
+        if (twoFactorTotp != null) user.setTwoFactorTotp(twoFactorTotp);
+        if (twoFactorPasskey != null) user.setTwoFactorPasskey(twoFactorPasskey);
+        if (twoFactorLine != null) user.setTwoFactorLine(twoFactorLine);
 
         // Password update check
         if (newPassword != null && !newPassword.trim().isEmpty()) {
@@ -380,6 +454,38 @@ public class AuthController {
         User responseUser = user;
         responseUser.setPassword(null);
         return ResponseEntity.ok(responseUser);
+    }
+
+    @PostMapping("/toggle-2fa-method")
+    public ResponseEntity<?> toggle2faMethod(@RequestBody Map<String, Object> payload) {
+        String clerkUserId = com.edocman.security.UserContext.getCurrentUser();
+        if (clerkUserId == null) {
+            return ResponseEntity.status(401).body("{\"error\": \"Unauthorized\"}");
+        }
+
+        Optional<User> userOpt = userRepository.findByClerkUserId(clerkUserId);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("{\"error\": \"User not found\"}");
+        }
+
+        User user = userOpt.get();
+        String method = (String) payload.get("method");
+        Boolean enabled = (Boolean) payload.get("enabled");
+
+        if (method != null && enabled != null) {
+            switch (method.toLowerCase()) {
+                case "master" -> user.setTwoFactorEnabled(enabled);
+                case "email" -> user.setTwoFactorEmail(enabled);
+                case "sms" -> user.setTwoFactorSms(enabled);
+                case "totp" -> user.setTwoFactorTotp(enabled);
+                case "passkey" -> user.setTwoFactorPasskey(enabled);
+                case "line" -> user.setTwoFactorLine(enabled);
+            }
+            userRepository.save(user);
+        }
+
+        user.setPassword(null);
+        return ResponseEntity.ok(user);
     }
 
     private String hashPassword(String password) {

@@ -117,6 +117,9 @@ public class DocumentGeneratorService {
             case SMART_ETAX:
                 generateSmartEtaxHtml(html, order, data, customerName);
                 break;
+            default:
+                generateGenericLegalDocumentHtml(html, order, data, customerName);
+                break;
         }
 
         // Shared Footer Signatures
@@ -584,5 +587,40 @@ private void generateFinancialStatementAuditHtml(StringBuilder html, LegalServic
                 "ข้าพเจ้ายินยอมให้ผู้ให้บริการ eDocman และพาร์ทเนอร์นำส่งเอกสารการสมัครสิทธิ ออกแบบระบบลงนามเอกสารอิเล็กทรอนิกส์ (HSM/Cloud Signature) " +
                 "และติดต่อกรมสรรพากรเพื่อขอนำส่งข้อมูลทางอิเล็กทรอนิกส์ตามมาตรา 3 ตรี แห่งประมวลรัษฎากร</p>\n");
         html.append("  </div>\n");
+    }
+
+    private void generateGenericLegalDocumentHtml(StringBuilder html, LegalServiceOrder order, Map<String, Object> data, String customerName) {
+        String title = order.getServiceType().name().replace("_", " ");
+        html.append("  <div class=\"doc-title\">ใบคำขอและเอกสารบันทึกรายการราชการอิเล็กทรอนิกส์ (" + title + ")</div>\n");
+        
+        html.append("  <div class=\"section\">\n");
+        html.append("    <div class=\"section-title\">ข้อมูลผู้ขอรับบริการ / Applicant Information</div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ชื่อ-นามสกุล / Full Name:</span> <span class=\"value\">" + customerName + "</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">เลขอ้างอิงคำขอ / Order ID:</span> <span class=\"value\">#" + order.getId() + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("    <div class=\"row\">\n");
+        html.append("      <div class=\"col\"><span class=\"label\">ค่าธรรมเนียม / Fee:</span> <span class=\"value\">" + order.getPrice() + " THB</span></div>\n");
+        html.append("      <div class=\"col\"><span class=\"label\">สถานะ / Status:</span> <span class=\"value\">" + order.getStatus() + "</span></div>\n");
+        html.append("    </div>\n");
+        html.append("  </div>\n");
+
+        if (data != null && !data.isEmpty()) {
+            html.append("  <div class=\"section\">\n");
+            html.append("    <div class=\"section-title\">รายละเอียดข้อมูลที่กรอกในระบบ / Submitted Application Details</div>\n");
+            data.forEach((k, v) -> {
+                if (!"attachmentUrl".equals(k)) {
+                    html.append("    <div class=\"row\" style=\"margin-bottom:6px;\">\n");
+                    html.append("      <div class=\"col\"><span class=\"label\">" + k + ":</span> <span class=\"value\" style=\"min-width:300px;\">" + String.valueOf(v) + "</span></div>\n");
+                    html.append("    </div>\n");
+                }
+            });
+            if (data.containsKey("attachmentUrl")) {
+                html.append("    <div class=\"row\" style=\"margin-top:10px;\">\n");
+                html.append("      <div class=\"col\"><span class=\"label\">เอกสารแนบในระบบ / Attachment:</span> <span class=\"value\">อัปโหลดเข้าระบบเรียบร้อยแล้ว</span></div>\n");
+                html.append("    </div>\n");
+            }
+            html.append("  </div>\n");
+        }
     }
 }

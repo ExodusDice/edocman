@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 @Table(name = "service_prices")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class ServicePrice {
     @Id
