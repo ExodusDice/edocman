@@ -231,15 +231,16 @@ function showSection(sectionId) {
         if (navLink) navLink.classList.add('active');
         fetchOrders();
     } else if (sectionId === 'progress') {
+        if (!currentToken) {
+            alert("กรุณาเข้าสู่ระบบก่อนติดตามสถานะงาน");
+            openAuthModal('signin');
+            return;
+        }
         const el = document.getElementById('progress-section');
         if (el) el.classList.remove('hidden');
         const navLink = document.getElementById('nav-progress-link');
         if (navLink) navLink.classList.add('active');
-        if (currentToken) {
-            loadClientProgressData();
-        } else {
-            renderGuestProgressPrompt();
-        }
+        loadClientProgressData();
     } else if (sectionId === 'profile') {
         if (!currentToken) {
             alert("กรุณาเข้าสู่ระบบก่อนจัดการโปรไฟล์");
@@ -344,6 +345,8 @@ function checkSession() {
         if (userProfile) userProfile.classList.add('hidden');
         if (adminHeader) adminHeader.classList.add('hidden');
         if (navBrandTitle) navBrandTitle.innerText = 'eDocman';
+        if (navDashboard) navDashboard.classList.add('hidden');
+        if (navProgress) navProgress.classList.add('hidden');
 
         const crisp = document.getElementById('crisp-widget');
         const pdpa = document.getElementById('pdpa-floating-badge-btn');
